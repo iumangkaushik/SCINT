@@ -1,0 +1,9 @@
+ip,country,city,isp,type,abuse_reports,attack_types,last_reported,risk_score
+45.133.1.98,Russia,Moscow,Hosting Ukraine LTD,Datacenter,143,"Phishing,Brute Force,Fraud",2026-06-04,91
+185.220.101.45,Germany,Frankfurt,Tor Exit Node,Tor,89,"Anonymization,C2",2026-06-05,95
+194.165.16.72,Netherlands,Amsterdam,ColoCrossing,Datacenter,67,"Investment Scam,Phishing",2026-06-03,88
+91.108.4.200,Russia,St Petersburg,MivoCloud,Datacenter,112,"APK Distribution,Malware",2026-06-06,94
+103.21.45.67,India,Delhi,Reliance Jio,Residential,2,"Spam",2026-05-12,15
+122.161.45.67,India,Mumbai,Airtel Broadband,Residential,0,,2026-01-01,5
+49.32.11.201,India,Kolkata,BSNL,Residential,4,"OTP Fraud",2026-04-22,22
+103.56.78.90,India,Bengaluru,Tata Communications,Residential,1,"Spam",2026-03-15,10
