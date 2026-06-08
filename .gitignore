@@ -1,0 +1,17 @@
+# Secrets - never commit
+.env
+.claude/
+
+# Generated reports
+reports/*.json
+reports/*.html
+!reports/.gitkeep
+
+# Generated SQLite DB (rebuild with: python build_db.py)
+data/scint.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
