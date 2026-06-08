@@ -1,0 +1,27 @@
+phone,case_number,year,crime_type,police_station,status,victim_count
+9105218549,CYBER/HR/2023/0972,2023,UPI Scam,Cyber PS Noida,Convicted,17
+9105218549,CYBER/NDA/2025/1772,2025,Phishing,Cyber PS Gurugram,Convicted,28
+9105218549,CYBER/NDA/2022/1523,2022,Phishing,Cyber PS Noida,Convicted,8
+9214584210,CYBER/DL/2023/1940,2023,SIM Swap Fraud,Cyber PS Noida,Convicted,19
+9214584210,CYBER/DL/2024/0895,2024,APK Malware Fraud,Cyber PS Gurugram,Convicted,31
+9214584210,CYBER/NDA/2025/1763,2025,Loan App Extortion,Cyber PS Delhi,Convicted,34
+9085651788,CYBER/NDA/2024/0136,2024,APK Malware Fraud,Cyber PS Faridabad,Convicted,18
+9884791889,CYBER/HR/2024/0379,2024,Loan App Extortion,Cyber PS Noida,Chargesheeted,26
+9898329822,CYBER/NDA/2022/0552,2022,Loan App Extortion,Cyber PS Noida,Convicted,6
+9898329822,CYBER/HR/2025/0417,2025,Phishing,Cyber PS Delhi,Convicted,33
+9879169797,CYBER/HR/2023/0588,2023,Loan App Extortion,Cyber PS Noida,Chargesheeted,3
+9879169797,CYBER/DL/2025/1319,2025,Digital Arrest Scam,Cyber PS Faridabad,Under Investigation,8
+9879169797,CYBER/HR/2025/1088,2025,Loan App Extortion,Cyber PS Gurugram,Chargesheeted,14
+9812061769,CYBER/DL/2025/1343,2025,Loan App Extortion,Cyber PS Faridabad,Under Investigation,5
+9812061769,CYBER/GGN/2023/1355,2023,Loan App Extortion,Cyber PS Noida,Under Investigation,27
+9812061769,CYBER/GGN/2024/1009,2024,Sextortion,Cyber PS Noida,Under Investigation,25
+9193039955,CYBER/NDA/2022/0946,2022,Online Fraud,Cyber PS Gurugram,Convicted,2
+9193039955,CYBER/GGN/2024/0337,2024,Phishing,Cyber PS Faridabad,Chargesheeted,25
+9157539210,CYBER/DL/2023/1416,2023,OTP Fraud,Cyber PS Jaipur,Chargesheeted,21
+9157539210,CYBER/HR/2022/1174,2022,Phishing,Cyber PS Noida,Under Investigation,18
+9157539210,CYBER/NDA/2025/0643,2025,Loan App Extortion,Cyber PS Gurugram,Chargesheeted,18
+9750580777,CYBER/DL/2024/0754,2024,UPI Scam,Cyber PS Gurugram,Chargesheeted,14
+9750580777,CYBER/HR/2025/0487,2025,OTP Fraud,Cyber PS Faridabad,Chargesheeted,20
+9750580777,CYBER/GGN/2025/0728,2025,Online Fraud,Cyber PS Delhi,Under Investigation,15
+9124528771,CYBER/GGN/2023/1405,2023,SIM Swap Fraud,Cyber PS Jaipur,Under Investigation,3
+9676669716,CYBER/DL/2024/0333,2024,Loan App Extortion,Cyber PS Noida,Under Investigation,5
