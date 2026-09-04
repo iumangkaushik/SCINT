@@ -250,6 +250,50 @@ input[type=file]{background:var(--bg);border:1px solid var(--border);color:var(-
 .leaflet-control-zoom a{background:var(--surface)!important;color:var(--dim)!important;
   border-color:var(--border)!important}
 .leaflet-control-zoom a:hover{background:var(--surface2)!important;color:var(--accent)!important}
+
+.hamburger{display:none;background:none;border:none;color:var(--dim);font-size:22px;
+  cursor:pointer;padding:4px 8px;line-height:1;flex-shrink:0}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:49}
+
+@media(max-width:768px){
+  body{grid-template-columns:1fr;
+    grid-template-areas:"banner" "topbar" "main" "foot"}
+  .sidebar{position:fixed;top:0;left:-260px;width:260px;height:100%;z-index:50;
+    transition:left .25s ease;padding-top:16px}
+  .sidebar.open{left:0}
+  .sidebar-overlay.open{display:block}
+  .hamburger{display:block}
+  .tb-sub{display:none}
+  .tb-search{max-width:none}
+  .tb-search input{padding:8px 10px;font-size:12px}
+  .tb-right{gap:8px}
+  .threat-pill{font-size:8px;padding:4px 8px}
+  .tb-clock{font-size:10px}
+  .main{padding:14px 10px}
+  .panel-head h1{font-size:18px}
+  .metrics{grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px}
+  .metric .val{font-size:20px}
+  .metric .lbl{font-size:9px}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .data-cards{grid-template-columns:1fr}
+  .scorecard{flex-direction:column;align-items:flex-start;gap:14px;padding:14px}
+  .gauge{width:90px;height:90px;align-self:center}
+  .gauge .num{font-size:26px}
+  .sc-info{min-width:0;width:100%}
+  .sc-info h2{font-size:16px}
+  .searchbar{flex-direction:column}
+  .searchbar input[type=text]{font-size:13px}
+  .tbl{font-size:11px}
+  .tbl th,.tbl td{padding:8px 6px}
+  .card{padding:12px}
+  .banner{font-size:8px;letter-spacing:1.5px}
+  .foot{font-size:7px;gap:8px;flex-wrap:wrap}
+  .btn{padding:10px 16px;font-size:12px}
+  .btn-sm{padding:5px 10px;font-size:10px}
+  .input{font-size:13px !important}
+  #flowGraph{height:250px !important}
+  #netGraph{height:250px !important}
+}
 </style>
 </head>
 <body>
@@ -257,6 +301,7 @@ input[type=file]{background:var(--bg);border:1px solid var(--border);color:var(-
 <div class="banner">RESTRICTED — FOR AUTHORIZED PERSONNEL ONLY — DEMONSTRATION DATA</div>
 
 <header class="topbar">
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">&#9776;</button>
   <div class="tb-brand">
     <span class="tb-logo">SCINT</span>
     <span class="tb-sub">Intelligence Platform</span>
@@ -271,7 +316,8 @@ input[type=file]{background:var(--bg);border:1px solid var(--border);color:var(-
   </div>
 </header>
 
-<nav class="sidebar">
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<nav class="sidebar" id="sidebar">
   <div class="nav-section">Operations</div>
   <a class="nav-item active" data-p="cmd"><div class="nav-icon">CC</div>Command Center</a>
   <a class="nav-item" data-p="intel"><div class="nav-icon">IS</div>Intel Search</a>
@@ -1061,6 +1107,12 @@ function row(k,v,bad){return`<div class="row"><span class="k">${esc(k)}</span><s
 function bandColor(s){return s>=75?'var(--red)':s>=40?'var(--amber)':'var(--green)'}
 function bandName(s){return s>=75?'HIGH':s>=40?'MEDIUM':'LOW'}
 
+// ── Sidebar toggle (mobile) ──
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
 // ── Navigation ──
 document.querySelectorAll('.nav-item').forEach(n=>{
   n.onclick=()=>{
@@ -1074,6 +1126,11 @@ document.querySelectorAll('.nav-item').forEach(n=>{
     if(n.dataset.p==='watch')loadWatchlist();
     if(n.dataset.p==='analytics'&&anMap)setTimeout(()=>anMap.invalidateSize(),150);
     if(n.dataset.p==='cmd'&&cmdMap)setTimeout(()=>cmdMap.invalidateSize(),150);
+    // Close sidebar on mobile
+    if(window.innerWidth<=768){
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    }
   };
 });
 
