@@ -141,6 +141,34 @@ def ensure_extra_tables():
             risk_band TEXT DEFAULT 'LOW',
             ts TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS golden_hour (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            victim_name TEXT NOT NULL,
+            victim_phone TEXT NOT NULL,
+            suspect_phone TEXT DEFAULT '',
+            suspect_upi TEXT DEFAULT '',
+            suspect_bank TEXT DEFAULT '',
+            suspect_account TEXT DEFAULT '',
+            scam_type TEXT DEFAULT 'UPI Fraud',
+            amount_lost REAL DEFAULT 0,
+            description TEXT DEFAULT '',
+            started_at TEXT NOT NULL,
+            status TEXT DEFAULT 'active',
+            steps TEXT DEFAULT '{}',
+            scan_results TEXT DEFAULT '{}'
+        );
+        CREATE TABLE IF NOT EXISTS complaints (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            victim_name TEXT DEFAULT '',
+            victim_phone TEXT DEFAULT '',
+            suspect_indicators TEXT DEFAULT '',
+            scam_type TEXT DEFAULT '',
+            amount REAL DEFAULT 0,
+            description TEXT DEFAULT '',
+            state TEXT DEFAULT '',
+            filed_at TEXT NOT NULL,
+            cluster_id INTEGER DEFAULT 0
+        );
     """)
     conn.commit()
     conn.close()
@@ -225,6 +253,116 @@ def get_threat_level():
         level = "NORMAL"
     return {"level": level, "score": round(avg), "scans_24h": len(recent),
             "high_hits": high_count, "watchlist": wl_count}
+
+
+# ── Golden Hour ──────────────────────────────────────────────────────────────
+
+def start_golden_hour(victim_name, victim_phone, suspect_phone="",
+                      suspect_upi="", suspect_bank="", suspect_account="",
+                      scam_type="UPI Fraud", amount_lost=0, description=""):
+    ensure_extra_tables()
+    import json
+    steps = json.dumps({
+        "scan_suspect": {"done": False, "ts": None, "label": "Scan suspect identifiers"},
+        "freeze_request": {"done": False, "ts": None, "label": "Generate bank freeze notice (Sec 94 BNSS)"},
+        "cdr_request": {"done": False, "ts": None, "label": "Request CDR/IPDR from telecom"},
+        "check_watchlist": {"done": False, "ts": None, "label": "Check against watchlist & CCTNS"},
+        "log_ncrp": {"done": False, "ts": None, "label": "Log complaint in NCRP format"},
+        "generate_report": {"done": False, "ts": None, "label": "Generate case summary PDF"},
+    })
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        "INSERT INTO golden_hour "
+        "(victim_name,victim_phone,suspect_phone,suspect_upi,suspect_bank,"
+        "suspect_account,scam_type,amount_lost,description,started_at,status,steps,scan_results) "
+        "VALUES (?,?,?,?,?,?,?,?,?,datetime('now'),'active',?,'{}')",
+        (victim_name, victim_phone, suspect_phone, suspect_upi, suspect_bank,
+         suspect_account, scam_type, amount_lost, description, steps))
+    conn.commit()
+    gid = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+    conn.close()
+    return gid
+
+
+def get_golden_hour(gid):
+    ensure_extra_tables()
+    rows = query("SELECT * FROM golden_hour WHERE id=?", (gid,))
+    return rows[0] if rows else None
+
+
+def get_active_golden_hours():
+    ensure_extra_tables()
+    return query("SELECT * FROM golden_hour ORDER BY started_at DESC LIMIT 20")
+
+
+def update_golden_step(gid, step_key, done=True):
+    ensure_extra_tables()
+    import json
+    row = get_golden_hour(gid)
+    if not row:
+        return
+    steps = json.loads(row["steps"] or "{}")
+    if step_key in steps:
+        steps[step_key]["done"] = done
+        steps[step_key]["ts"] = None  # will be set by trigger
+        conn = sqlite3.connect(DB_PATH)
+        conn.execute("UPDATE golden_hour SET steps=? WHERE id=?",
+                     (json.dumps(steps), gid))
+        conn.commit()
+        conn.close()
+
+
+def update_golden_scan(gid, scan_results):
+    ensure_extra_tables()
+    import json
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("UPDATE golden_hour SET scan_results=? WHERE id=?",
+                 (json.dumps(scan_results), gid))
+    conn.commit()
+    conn.close()
+
+
+def close_golden_hour(gid):
+    ensure_extra_tables()
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("UPDATE golden_hour SET status='completed' WHERE id=?", (gid,))
+    conn.commit()
+    conn.close()
+
+
+# ── Complaints & Clustering ──────────────────────────────────────────────────
+
+def add_complaint(victim_name, victim_phone, suspect_indicators, scam_type,
+                  amount, description, state):
+    ensure_extra_tables()
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        "INSERT INTO complaints "
+        "(victim_name,victim_phone,suspect_indicators,scam_type,amount,"
+        "description,state,filed_at,cluster_id) "
+        "VALUES (?,?,?,?,?,?,?,datetime('now'),0)",
+        (victim_name, victim_phone, suspect_indicators, scam_type,
+         amount, description, state))
+    conn.commit()
+    cid = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+    conn.close()
+    return cid
+
+
+def get_complaints(limit=100):
+    ensure_extra_tables()
+    return query("SELECT * FROM complaints ORDER BY filed_at DESC LIMIT ?", (limit,))
+
+
+def update_cluster_ids(clusters):
+    ensure_extra_tables()
+    conn = sqlite3.connect(DB_PATH)
+    for cluster_id, complaint_ids in enumerate(clusters, 1):
+        for cid in complaint_ids:
+            conn.execute("UPDATE complaints SET cluster_id=? WHERE id=?",
+                         (cluster_id, cid))
+    conn.commit()
+    conn.close()
 
 
 if __name__ == "__main__":
