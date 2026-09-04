@@ -10,6 +10,7 @@
 <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <style>
 :root{
   --bg:#050a14;--surface:#0a1628;--surface2:#0f1d32;--surface3:#162544;
@@ -201,6 +202,54 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);
 input[type=file]{background:var(--bg);border:1px solid var(--border);color:var(--text);
   padding:10px;border-radius:8px;font-size:13px;flex:1}
 .pill{font-family:var(--mono);font-weight:700;font-size:10px;padding:3px 8px;border-radius:12px}
+
+.map-wrap{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.map-toolbar{position:absolute;top:10px;right:10px;z-index:1000;display:flex;gap:6px;flex-wrap:wrap}
+.map-btn{background:var(--surface);border:1px solid var(--border);color:var(--dim);
+  padding:6px 10px;border-radius:6px;font-size:10px;font-family:var(--mono);font-weight:600;
+  cursor:pointer;transition:all .15s;letter-spacing:.5px;text-transform:uppercase;
+  backdrop-filter:blur(8px);white-space:nowrap}
+.map-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(6,214,160,.08)}
+.map-btn.active{background:rgba(6,214,160,.15);border-color:var(--accent);color:var(--accent)}
+.map-legend{position:absolute;bottom:10px;left:10px;z-index:1000;background:rgba(10,22,40,.92);
+  border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:10px;
+  font-family:var(--mono);backdrop-filter:blur(8px);min-width:140px}
+.map-legend .leg-title{font-weight:700;color:var(--text);letter-spacing:1px;margin-bottom:6px;
+  text-transform:uppercase;font-size:9px}
+.map-legend .leg-row{display:flex;align-items:center;gap:8px;padding:2px 0;color:var(--dim)}
+.map-legend .leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.map-legend .leg-line{width:16px;height:2px;flex-shrink:0;border-radius:1px}
+.map-stats{position:absolute;top:10px;left:10px;z-index:1000;background:rgba(10,22,40,.92);
+  border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--mono);
+  backdrop-filter:blur(8px)}
+.map-stats .ms-val{font-size:18px;font-weight:800;color:var(--accent);line-height:1}
+.map-stats .ms-lbl{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.map-stats .ms-row{display:flex;gap:16px;margin-top:6px}
+.map-stats .ms-item{text-align:center}
+.map-stats .ms-n{font-size:13px;font-weight:700}
+.map-stats .ms-t{font-size:8px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+
+@keyframes pulse-marker{0%{transform:scale(1);opacity:.7}50%{transform:scale(1.8);opacity:0}100%{transform:scale(1);opacity:0}}
+.pulse-ring{position:absolute;border-radius:50%;animation:pulse-marker 2s infinite;pointer-events:none}
+
+.leaflet-popup-content-wrapper{background:var(--surface)!important;color:var(--text)!important;
+  border:1px solid var(--border)!important;border-radius:8px!important;box-shadow:0 8px 32px rgba(0,0,0,.5)!important;
+  font-family:var(--font)!important}
+.leaflet-popup-tip{background:var(--surface)!important;border:1px solid var(--border)!important}
+.leaflet-popup-content{margin:10px 14px!important;font-size:12px!important;line-height:1.6!important}
+.leaflet-popup-content b{color:var(--accent)}
+.leaflet-popup-content .pop-city{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.leaflet-popup-content .pop-row{display:flex;justify-content:space-between;gap:14px;
+  padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.leaflet-popup-content .pop-k{color:var(--muted);font-size:11px}
+.leaflet-popup-content .pop-v{font-family:var(--mono);font-weight:600;font-size:11px}
+.leaflet-popup-content .pop-v.high{color:var(--red)}
+.leaflet-popup-content .pop-v.warn{color:var(--amber)}
+.leaflet-popup-content .pop-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;
+  border-radius:4px;margin:2px 2px 0 0;font-family:var(--mono);letter-spacing:.3px}
+.leaflet-control-zoom a{background:var(--surface)!important;color:var(--dim)!important;
+  border-color:var(--border)!important}
+.leaflet-control-zoom a:hover{background:var(--surface2)!important;color:var(--accent)!important}
 </style>
 </head>
 <body>
@@ -228,9 +277,19 @@ input[type=file]{background:var(--bg);border:1px solid var(--border);color:var(-
   <a class="nav-item" data-p="intel"><div class="nav-icon">IS</div>Intel Search</a>
   <a class="nav-item" data-p="net"><div class="nav-icon">NA</div>Network Analysis</a>
   <a class="nav-item" data-p="osint"><div class="nav-icon">OI</div>OSINT Recon</a>
+  <div class="nav-section">Response</div>
+  <a class="nav-item" data-p="golden"><div class="nav-icon" style="background:rgba(239,68,68,.2);color:#ef4444">GH</div>Golden Hour</a>
+  <a class="nav-item" data-p="sec94"><div class="nav-icon">S94</div>Sec 94 Notice</a>
   <div class="nav-section">Operations</div>
   <a class="nav-item" data-p="bulk"><div class="nav-icon">BK</div>Bulk Operations</a>
   <a class="nav-item" data-p="watch"><div class="nav-icon">WL</div>Watchlist</a>
+  <a class="nav-item" data-p="cluster"><div class="nav-icon">CL</div>Complaint Cluster</a>
+  <div class="nav-section">Intelligence</div>
+  <a class="nav-item" data-p="darrest"><div class="nav-icon" style="background:rgba(239,68,68,.2);color:#ef4444">DA</div>Digital Arrest</a>
+  <a class="nav-item" data-p="sms"><div class="nav-icon" style="background:rgba(245,158,11,.2);color:#f59e0b">SM</div>SMS Classifier</a>
+  <a class="nav-item" data-p="flow"><div class="nav-icon" style="background:rgba(167,139,250,.2);color:#a78bfa">FF</div>Financial Flow</a>
+  <a class="nav-item" data-p="playbook"><div class="nav-icon" style="background:rgba(59,130,246,.2);color:#3b82f6">PB</div>Playbook</a>
+  <a class="nav-item" data-p="impact"><div class="nav-icon" style="background:rgba(34,197,94,.2);color:#22c55e">VI</div>Victim Impact</a>
   <div class="nav-section">Analysis</div>
   <a class="nav-item" data-p="analytics"><div class="nav-icon">AN</div>Analytics</a>
   <a class="nav-item" data-p="doctrine"><div class="nav-icon">DC</div>Doctrine</a>
@@ -266,9 +325,35 @@ input[type=file]{background:var(--bg);border:1px solid var(--border);color:var(-
       <div style="height:260px"><canvas id="cmdRisk"></canvas></div>
     </div>
   </div>
-  <div class="card" style="margin-top:14px">
-    <div class="card-title"><span class="dot" style="background:var(--blue)"></span>Operational Map — Last Known Locations</div>
-    <div id="cmdMap" style="height:300px;border-radius:8px"></div>
+  <div class="card" style="margin-top:14px;padding:0;overflow:hidden">
+    <div class="card-title" style="padding:14px 16px 0"><span class="dot" style="background:var(--blue)"></span>Operational Intelligence Map</div>
+    <div class="map-wrap" style="height:460px;border:none;border-radius:0">
+      <div id="cmdMap" style="height:100%;width:100%"></div>
+      <div class="map-stats" id="mapStats">
+        <div class="ms-val" id="mapTotalCities">--</div>
+        <div class="ms-lbl">Active Zones</div>
+        <div class="ms-row">
+          <div class="ms-item"><div class="ms-n" style="color:var(--red)" id="mapHighCount">0</div><div class="ms-t">High Risk</div></div>
+          <div class="ms-item"><div class="ms-n" style="color:var(--amber)" id="mapFlagCount">0</div><div class="ms-t">Flagged</div></div>
+          <div class="ms-item"><div class="ms-n" style="color:var(--accent)" id="mapCaseCount">0</div><div class="ms-t">Cases</div></div>
+        </div>
+      </div>
+      <div class="map-toolbar" id="mapToolbar">
+        <button class="map-btn active" onclick="toggleMapLayer('markers')" id="btnMarkers">Markers</button>
+        <button class="map-btn" onclick="toggleMapLayer('heat')" id="btnHeat">Heatmap</button>
+        <button class="map-btn" onclick="toggleMapLayer('connections')" id="btnConn">Connections</button>
+        <button class="map-btn" onclick="cmdMap.setView([22.5,82],5)" id="btnFit">Fit India</button>
+        <button class="map-btn" onclick="cmdMap.setView([28.5,77.1],10)">NCR Zoom</button>
+      </div>
+      <div class="map-legend">
+        <div class="leg-title">Threat Level</div>
+        <div class="leg-row"><span class="leg-dot" style="background:#ef4444;box-shadow:0 0 6px #ef4444"></span> High Risk Zone</div>
+        <div class="leg-row"><span class="leg-dot" style="background:#f59e0b;box-shadow:0 0 6px #f59e0b"></span> Moderate Activity</div>
+        <div class="leg-row"><span class="leg-dot" style="background:#22c55e;box-shadow:0 0 6px #22c55e"></span> Low / Clean</div>
+        <div class="leg-row"><span class="leg-line" style="background:#3b82f6"></span> Shared IP Link</div>
+        <div class="leg-row"><span class="leg-dot" style="background:var(--accent);width:8px;height:8px;opacity:.6"></span> Heat Intensity</div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -402,9 +487,22 @@ input[type=file]{background:var(--bg);border:1px solid var(--border);color:var(-
       <div class="card"><div class="card-title">Cases by Year</div><div style="height:240px"><canvas id="chartYear"></canvas></div></div>
       <div class="card"><div class="card-title">Case Status</div><div style="height:240px"><canvas id="chartStatus"></canvas></div></div>
     </div>
-    <div class="card" style="margin-top:14px">
-      <div class="card-title">Geographic Distribution</div>
-      <div id="anMap" style="height:340px;border-radius:8px"></div>
+    <div class="card" style="margin-top:14px;padding:0;overflow:hidden">
+      <div class="card-title" style="padding:14px 16px 0">Geographic Crime Distribution</div>
+      <div class="map-wrap" style="height:420px;border:none;border-radius:0">
+        <div id="anMap" style="height:100%;width:100%"></div>
+        <div class="map-toolbar">
+          <button class="map-btn active" onclick="toggleAnLayer('markers')" id="anBtnMarkers">Markers</button>
+          <button class="map-btn" onclick="toggleAnLayer('heat')" id="anBtnHeat">Heatmap</button>
+          <button class="map-btn" onclick="anMap.setView([22.5,82],5)">Fit India</button>
+        </div>
+        <div class="map-legend">
+          <div class="leg-title">Records</div>
+          <div class="leg-row"><span class="leg-dot" style="background:#ef4444;width:14px;height:14px"></span> 10+ records</div>
+          <div class="leg-row"><span class="leg-dot" style="background:#f59e0b;width:10px;height:10px"></span> 5–9 records</div>
+          <div class="leg-row"><span class="leg-dot" style="background:#22c55e;width:7px;height:7px"></span> 1–4 records</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -434,6 +532,327 @@ input[type=file]{background:var(--bg);border:1px solid var(--border);color:var(-
     <b style="color:var(--text)">India:</b> NCRP (cybercrime.gov.in) &middot; I4C &middot; CEIR (IMEI blocking) &middot;
     CERT-In &middot; CCTNS &middot; MLAT for foreign-hosted servers. See <b>INVESTIGATION_GUIDE.md</b> for the full breakdown.
   </p>
+</section>
+
+<!-- ═══ GOLDEN HOUR ═══ -->
+<section class="panel" id="p-golden">
+  <div class="panel-head">
+    <h1 style="color:var(--red)">Golden Hour Response</h1>
+    <div class="sub">Critical 2-hour window for fund recovery — every second counts</div>
+  </div>
+
+  <div id="ghActive" style="display:none">
+    <div class="card card-alert" style="margin-bottom:16px;text-align:center;padding:24px">
+      <div style="font-size:11px;color:var(--red);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Golden Hour Active — Time Remaining</div>
+      <div id="ghTimer" style="font-family:var(--mono);font-size:56px;font-weight:800;color:var(--red);line-height:1;text-shadow:0 0 30px rgba(239,68,68,.4)">02:00:00</div>
+      <div id="ghTimerBar" style="width:100%;height:4px;background:var(--border);border-radius:2px;margin-top:12px;overflow:hidden">
+        <div id="ghTimerFill" style="height:100%;background:linear-gradient(90deg,var(--red),#f97316);width:100%;transition:width 1s linear;border-radius:2px"></div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:20px;margin-top:12px;font-size:11px;color:var(--muted);font-family:var(--mono)">
+        <span>Victim: <b id="ghVictimLabel" style="color:var(--text)">—</b></span>
+        <span>Suspect: <b id="ghSuspectLabel" style="color:var(--red)">—</b></span>
+        <span>Amount: <b id="ghAmountLabel" style="color:var(--amber)">—</b></span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-title"><span class="dot" style="background:var(--accent)"></span>Investigation Workflow — Complete Each Step</div>
+      <div id="ghSteps"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--blue)"></span>Auto-Scan Results</div>
+        <div id="ghScanResults"><div class="empty">Click "Scan Suspect" to begin</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--amber)"></span>Generated Notices</div>
+        <div id="ghNotices"><div class="empty">Complete scan step first</div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;display:flex;gap:10px">
+      <button class="btn btn-outline" onclick="closeGoldenHour()" style="border-color:rgba(239,68,68,.4);color:var(--red)">Close Case</button>
+    </div>
+  </div>
+
+  <div id="ghForm">
+    <div class="doctrine-highlight" style="border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.06);margin-bottom:16px">
+      <b style="color:var(--red)">Golden Hour Protocol:</b> In financial fraud, the first 2 hours determine fund recovery.
+      This module guides you through every critical step — auto-scans suspect identifiers, generates legal notices, and tracks progress in real time.
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--red)"></span>Initiate Golden Hour</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Victim Name *</label>
+          <input type="text" id="ghVictimName" placeholder="Full name" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Victim Phone *</label>
+          <input type="text" id="ghVictimPhone" placeholder="10-digit number" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;font-family:var(--mono);outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Suspect Phone</label>
+          <input type="text" id="ghSuspectPhone" placeholder="Scammer's number" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;font-family:var(--mono);outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Suspect UPI ID</label>
+          <input type="text" id="ghSuspectUPI" placeholder="name@bank" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;font-family:var(--mono);outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Suspect Bank</label>
+          <input type="text" id="ghSuspectBank" placeholder="Bank name" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Suspect Account No.</label>
+          <input type="text" id="ghSuspectAccount" placeholder="Account number" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;font-family:var(--mono);outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Scam Type</label>
+          <select id="ghScamType" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;outline:none">
+            <option>UPI Fraud</option><option>Digital Arrest</option><option>Investment Scam</option>
+            <option>Job Scam</option><option>Sextortion</option><option>KYC Fraud</option>
+            <option>Loan App Fraud</option><option>Lottery/Prize Scam</option><option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Amount Lost (₹)</label>
+          <input type="number" id="ghAmount" placeholder="0" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;font-family:var(--mono);outline:none">
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Description</label>
+        <textarea id="ghDesc" rows="3" placeholder="Brief description of the fraud..." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:var(--font)"></textarea>
+      </div>
+      <button class="btn btn-primary" style="margin-top:14px;background:var(--red);width:100%;padding:14px;font-size:15px;letter-spacing:1px" onclick="startGoldenHour()">START GOLDEN HOUR</button>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title"><span class="dot" style="background:var(--muted)"></span>Previous Cases</div>
+      <div id="ghHistory"><div class="empty">No previous golden hour cases</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SECTION 94 NOTICE ═══ -->
+<section class="panel" id="p-sec94">
+  <div class="panel-head">
+    <h1>Section 94 BNSS Notice Generator</h1>
+    <div class="sub">Auto-generate legally formatted freeze notices for banks &amp; telecoms</div>
+  </div>
+  <div class="doctrine-highlight" style="margin-bottom:16px">
+    <b style="color:var(--accent)">Section 94 BNSS (2023):</b> Empowers police to requisition banks, telecom operators, and
+    intermediaries to furnish information and freeze suspicious accounts. Previously Section 91 CrPC.
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title"><span class="dot" style="background:var(--blue)"></span>Generate Notice</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Suspect Phone</label>
+        <input type="text" id="s94Phone" placeholder="10-digit number" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;font-family:var(--mono);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Suspect UPI ID</label>
+        <input type="text" id="s94UPI" placeholder="name@bank" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;font-family:var(--mono);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Bank Name</label>
+        <input type="text" id="s94Bank" placeholder="State Bank of India" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Account Number</label>
+        <input type="text" id="s94Account" placeholder="Account number" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;font-family:var(--mono);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Victim Name</label>
+        <input type="text" id="s94Victim" placeholder="Complainant name" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Amount Lost (₹)</label>
+        <input type="number" id="s94Amount" placeholder="0" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;font-family:var(--mono);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">FIR / Case Number</label>
+        <input type="text" id="s94FIR" placeholder="FIR-2026-XXXX" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;font-family:var(--mono);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Notice Type</label>
+        <select id="s94Type" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;outline:none">
+          <option value="bank">Bank Account Freeze (Sec 94)</option>
+          <option value="telecom">Telecom CDR/IPDR (Sec 91)</option>
+          <option value="both">Both — Bank + Telecom</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="generateNotice()" style="flex:1">Generate Notice</button>
+      <button class="btn btn-outline" onclick="printNotice()">Print / PDF</button>
+    </div>
+  </div>
+  <div id="s94Output" style="display:none">
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-title"><span class="dot" style="background:var(--accent)"></span>Section 94 BNSS — Bank Freeze Notice</div>
+      <pre id="s94BankNotice" style="white-space:pre-wrap;font-family:var(--mono);font-size:12.5px;color:var(--dim);line-height:1.7;background:var(--bg);padding:16px;border-radius:8px;border:1px solid var(--border);max-height:500px;overflow-y:auto"></pre>
+    </div>
+    <div class="card" id="s94TelecomCard" style="display:none;margin-bottom:14px">
+      <div class="card-title"><span class="dot" style="background:var(--blue)"></span>Section 91 BNSS — Telecom Notice</div>
+      <pre id="s94TelecomNotice" style="white-space:pre-wrap;font-family:var(--mono);font-size:12.5px;color:var(--dim);line-height:1.7;background:var(--bg);padding:16px;border-radius:8px;border:1px solid var(--border);max-height:500px;overflow-y:auto"></pre>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--red)"></span>Intelligence Addendum</div>
+      <div id="s94Intel"><div class="empty">Scanning suspect...</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ COMPLAINT CLUSTERING ═══ -->
+<section class="panel" id="p-cluster">
+  <div class="panel-head">
+    <h1>Complaint Clustering Engine</h1>
+    <div class="sub">Link multiple complaints by shared IOCs — phones, UPI IDs, accounts, IPs</div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title"><span class="dot" style="background:var(--accent)"></span>File New Complaint</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Victim Name</label>
+        <input type="text" id="clVictim" placeholder="Name" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px;border-radius:8px;font-size:12px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Victim Phone</label>
+        <input type="text" id="clPhone" placeholder="Phone" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px;border-radius:8px;font-size:12px;font-family:var(--mono);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Scam Type</label>
+        <select id="clType" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px;border-radius:8px;font-size:12px;outline:none">
+          <option>UPI Fraud</option><option>Digital Arrest</option><option>Investment Scam</option>
+          <option>Job Scam</option><option>Sextortion</option><option>KYC Fraud</option><option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Suspect Indicators (phones, UPIs, IPs)</label>
+        <input type="text" id="clIOC" placeholder="9876543210, fraud@ybl, 45.133.1.98" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px;border-radius:8px;font-size:12px;font-family:var(--mono);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Amount (₹)</label>
+        <input type="number" id="clAmount" placeholder="0" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px;border-radius:8px;font-size:12px;font-family:var(--mono);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">State</label>
+        <select id="clState" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px;border-radius:8px;font-size:12px;outline:none">
+          <option>Haryana</option><option>Delhi</option><option>UP</option><option>Rajasthan</option>
+          <option>Maharashtra</option><option>Karnataka</option><option>Tamil Nadu</option>
+          <option>West Bengal</option><option>Gujarat</option><option>MP</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:8px">
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Description</label>
+      <textarea id="clDesc" rows="2" placeholder="Brief description..." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px;border-radius:8px;font-size:12px;outline:none;resize:vertical;font-family:var(--font)"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button class="btn btn-primary btn-sm" onclick="addComplaint()">+ Add Complaint</button>
+      <button class="btn btn-sm" style="background:var(--accent);color:#031a12;font-weight:700" onclick="runClustering()">Run Clustering Engine</button>
+    </div>
+  </div>
+
+  <div id="clusterResults"></div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="card-title"><span class="dot" style="background:var(--muted)"></span>All Complaints</div>
+    <div id="clTable" style="max-height:400px;overflow-y:auto"><div class="empty">No complaints filed yet</div></div>
+  </div>
+</section>
+
+<!-- ═══ DIGITAL ARREST DETECTOR ═══ -->
+<section class="panel" id="p-darrest">
+  <div class="panel-head">
+    <h1 style="color:var(--red)">Digital Arrest Detector</h1>
+    <div class="sub">Analyze call/interaction descriptions for India's #1 cyber scam pattern</div>
+  </div>
+  <div class="doctrine-highlight" style="border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.06);margin-bottom:16px">
+    <b style="color:var(--red)">What is Digital Arrest?</b> Scammers impersonate CBI/Police/Customs officers via video call,
+    claim the victim is involved in money laundering or drug trafficking, and coerce them into transferring money to a "safe account."
+    <b>No real law enforcement agency does this.</b>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title"><span class="dot" style="background:var(--red)"></span>Analyze Interaction</div>
+    <textarea id="daText" rows="6" placeholder="Paste or describe the call/interaction here...&#10;&#10;Example: 'A person called on WhatsApp video claiming to be CBI officer. He said my Aadhaar is linked to money laundering case and I will be arrested. He asked me to transfer ₹2,00,000 to a safe RBI account immediately and told me not to tell anyone...'" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:14px;border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:var(--font);line-height:1.6"></textarea>
+    <button class="btn btn-primary" style="margin-top:10px;width:100%;background:var(--red);padding:14px;font-size:14px;letter-spacing:1px" onclick="detectDigitalArrest()">ANALYZE FOR DIGITAL ARREST</button>
+  </div>
+  <div id="daResults"></div>
+</section>
+
+<!-- ═══ SMS CLASSIFIER ═══ -->
+<section class="panel" id="p-sms">
+  <div class="panel-head">
+    <h1>Scam SMS Classifier</h1>
+    <div class="sub">Paste any SMS — auto-classifies scam type and extracts IOCs (phones, URLs, UPIs)</div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title"><span class="dot" style="background:var(--amber)"></span>Classify SMS</div>
+    <textarea id="smsText" rows="4" placeholder="Paste SMS text here...&#10;&#10;Example: 'Dear Customer, Your SBI KYC has expired. Update now to avoid account block. Click: http://bit.ly/sbi-kyc-update'" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:14px;border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:var(--mono);line-height:1.6"></textarea>
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button class="btn btn-primary" onclick="classifySMS()" style="flex:1">Classify & Extract IOCs</button>
+      <button class="btn btn-outline" onclick="demoSMS('kyc')">Demo: KYC</button>
+      <button class="btn btn-outline" onclick="demoSMS('job')">Demo: Job</button>
+      <button class="btn btn-outline" onclick="demoSMS('lottery')">Demo: Lottery</button>
+    </div>
+  </div>
+  <div id="smsResults"></div>
+</section>
+
+<!-- ═══ FINANCIAL FLOW VISUALIZER ═══ -->
+<section class="panel" id="p-flow">
+  <div class="panel-head">
+    <h1>Financial Flow Visualizer</h1>
+    <div class="sub">Map money trails and detect mule account patterns from transaction data</div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title"><span class="dot" style="background:var(--purple)"></span>Input Transactions</div>
+    <textarea id="flowText" rows="8" placeholder="Enter transactions (one per line): sender → receiver → amount&#10;&#10;Example:&#10;Victim_Raju → 9876543210@ybl → 50000&#10;9876543210@ybl → MuleAcc_SBI_4521 → 45000&#10;MuleAcc_SBI_4521 → CashOut_ATM_Delhi → 40000&#10;MuleAcc_SBI_4521 → CashOut_Wallet → 5000&#10;Victim_Priya → 9876543210@ybl → 30000" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:14px;border-radius:8px;font-size:12px;outline:none;resize:vertical;font-family:var(--mono);line-height:1.8"></textarea>
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button class="btn btn-primary" onclick="visualizeFlow()" style="flex:1">Visualize Money Flow</button>
+      <button class="btn btn-outline" onclick="loadDemoFlow()">Load Demo Data</button>
+    </div>
+  </div>
+  <div id="flowStats"></div>
+  <div id="flowGraph" style="height:480px;background:var(--surface);border:1px solid var(--border);border-radius:10px;display:none"></div>
+  <div id="flowMules" style="margin-top:14px"></div>
+</section>
+
+<!-- ═══ INVESTIGATION PLAYBOOK ═══ -->
+<section class="panel" id="p-playbook">
+  <div class="panel-head">
+    <h1>Investigation Playbook</h1>
+    <div class="sub">Auto-generated step-by-step investigation procedures by scam type</div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title"><span class="dot" style="background:var(--blue)"></span>Select Scam Type</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <select id="pbType" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:8px;font-size:13px;outline:none">
+        <option value="">— Select Scam Type —</option>
+        <option>UPI Fraud</option><option>Digital Arrest</option><option>Investment Scam</option>
+        <option>Sextortion</option><option>Job Scam</option><option>KYC Fraud</option>
+      </select>
+      <button class="btn btn-primary" onclick="loadPlaybook()">Generate Playbook</button>
+    </div>
+  </div>
+  <div id="pbResults"></div>
+</section>
+
+<!-- ═══ VICTIM IMPACT CALCULATOR ═══ -->
+<section class="panel" id="p-impact">
+  <div class="panel-head">
+    <h1>Victim Impact Calculator</h1>
+    <div class="sub">Aggregate damage analysis across all filed complaints</div>
+  </div>
+  <div style="margin-bottom:14px">
+    <button class="btn btn-primary" onclick="calcImpact()">Calculate Aggregate Impact</button>
+  </div>
+  <div id="impactResults"></div>
 </section>
 
 </main>
@@ -498,7 +917,23 @@ function factorChips(factors){
 }
 
 // ── Command Center ──
-let cmdMap=null,cmdMapInit=false;
+let cmdMap=null,cmdMapInit=false,cmdMarkerLayer=null,cmdHeatLayer=null,cmdConnLayer=null,cmdHeatData=[];
+let cmdLayers={markers:true,heat:false,connections:false};
+function toggleMapLayer(layer){
+  cmdLayers[layer]=!cmdLayers[layer];
+  document.getElementById('btnMarkers').classList.toggle('active',cmdLayers.markers);
+  document.getElementById('btnHeat').classList.toggle('active',cmdLayers.heat);
+  document.getElementById('btnConn').classList.toggle('active',cmdLayers.connections);
+  if(cmdLayers.markers){if(!cmdMap.hasLayer(cmdMarkerLayer))cmdMap.addLayer(cmdMarkerLayer)}
+  else{cmdMap.removeLayer(cmdMarkerLayer)}
+  if(cmdLayers.heat){
+    if(!cmdHeatLayer&&cmdHeatData.length)cmdHeatLayer=L.heatLayer(cmdHeatData,{radius:35,blur:25,maxZoom:10,
+      gradient:{0.2:'#064e3b',0.4:'#06d6a0',0.6:'#f59e0b',0.8:'#ef4444',1.0:'#7f1d1d'}});
+    if(cmdHeatLayer&&!cmdMap.hasLayer(cmdHeatLayer))cmdMap.addLayer(cmdHeatLayer);
+  }else{if(cmdHeatLayer)cmdMap.removeLayer(cmdHeatLayer)}
+  if(cmdLayers.connections){if(!cmdMap.hasLayer(cmdConnLayer))cmdMap.addLayer(cmdConnLayer)}
+  else{cmdMap.removeLayer(cmdConnLayer)}
+}
 async function loadCmd(){
   try{
     const[stats,threat,activity]=await Promise.all([
@@ -542,19 +977,89 @@ async function loadCmd(){
         options:{maintainAspectRatio:false,cutout:'70%',plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}}}});
     }
 
-    // Map
+    // Map — init
     if(!cmdMapInit){
-      cmdMap=L.map('cmdMap').setView([22.9,79],4);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-        {attribution:'OpenStreetMap CARTO',maxZoom:19}).addTo(cmdMap);
+      cmdMap=L.map('cmdMap',{zoomControl:true,attributionControl:false}).setView([22.5,82],5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(cmdMap);
+      L.control.attribution({prefix:false,position:'bottomright'}).addTo(cmdMap);
+      cmdMarkerLayer=L.layerGroup().addTo(cmdMap);
+      cmdHeatLayer=null;
+      cmdConnLayer=L.layerGroup();
       cmdMapInit=true;
     }
-    if(stats.map_points){
-      stats.map_points.forEach(p=>{
-        L.circleMarker([p.lat,p.lng],{radius:5+p.count,color:'#06d6a0',fillColor:'#06d6a0',
-          fillOpacity:.4,weight:1}).bindPopup('<b>'+esc(p.city)+'</b><br>'+p.count+' records').addTo(cmdMap);
+    // Fetch rich map data
+    try{
+      const md=await(await fetch('/api/mapdata')).json();
+      const cities=md.cities||[];
+      cmdMarkerLayer.clearLayers();
+      if(cmdHeatLayer){cmdMap.removeLayer(cmdHeatLayer);cmdHeatLayer=null;}
+      cmdConnLayer.clearLayers();
+
+      let totalHigh=0,totalFlagged=0,totalCases=0;
+      const heatPts=[];
+      const cityPositions={};
+
+      cities.forEach(c=>{
+        totalHigh+=c.high_risk;totalFlagged+=c.flagged;totalCases+=c.cases;
+        const risk=c.high_risk>0?'high':c.flagged>0?'warn':'low';
+        const col=risk==='high'?'#ef4444':risk==='warn'?'#f59e0b':'#22c55e';
+        const glow=risk==='high'?'0 0 12px rgba(239,68,68,.6)':risk==='warn'?'0 0 10px rgba(245,158,11,.5)':'0 0 8px rgba(34,197,94,.4)';
+        const sz=Math.min(8+c.phones*2,28);
+        cityPositions[c.city]=[c.lat,c.lng];
+        heatPts.push([c.lat,c.lng,c.phones*0.4+(c.high_risk*2)]);
+
+        // Pulsing ring for high-risk
+        if(risk==='high'){
+          const pulseIcon=L.divIcon({className:'',html:'<div style="width:'+sz*2.5+'px;height:'+sz*2.5+'px;border-radius:50%;border:2px solid '+col+';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);animation:pulse-marker 2s infinite;opacity:.5"></div>',iconSize:[sz*2.5,sz*2.5],iconAnchor:[sz*1.25,sz*1.25]});
+          L.marker([c.lat,c.lng],{icon:pulseIcon,interactive:false}).addTo(cmdMarkerLayer);
+        }
+
+        // Main marker
+        const icon=L.divIcon({className:'',html:'<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+col+';border:2px solid rgba(255,255,255,.3);box-shadow:'+glow+';cursor:pointer"></div>',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
+        const crimes=c.top_crimes||[];
+        let popHtml='<div class="pop-city">'+esc(c.city)+'</div>';
+        popHtml+='<div class="pop-row"><span class="pop-k">Phones Tracked</span><span class="pop-v">'+c.phones+'</span></div>';
+        popHtml+='<div class="pop-row"><span class="pop-k">High Risk</span><span class="pop-v '+(c.high_risk>0?'high':'')+'">'+c.high_risk+'</span></div>';
+        popHtml+='<div class="pop-row"><span class="pop-k">Flagged</span><span class="pop-v '+(c.flagged>0?'warn':'')+'">'+c.flagged+'</span></div>';
+        popHtml+='<div class="pop-row"><span class="pop-k">CCTNS Cases</span><span class="pop-v '+(c.cases>0?'high':'')+'">'+c.cases+'</span></div>';
+        popHtml+='<div class="pop-row"><span class="pop-k">Top Carrier</span><span class="pop-v">'+esc(c.top_carrier)+'</span></div>';
+        if(crimes.length){
+          popHtml+='<div style="margin-top:6px">';
+          crimes.forEach(cr=>{
+            const bg=cr[0].includes('Fraud')?'rgba(239,68,68,.2)':cr[0].includes('Phishing')?'rgba(245,158,11,.2)':'rgba(59,130,246,.2)';
+            const fc=cr[0].includes('Fraud')?'#fca5a5':cr[0].includes('Phishing')?'#fcd34d':'#93c5fd';
+            popHtml+='<span class="pop-badge" style="background:'+bg+';color:'+fc+'">'+esc(cr[0])+' ('+cr[1]+')</span>';
+          });
+          popHtml+='</div>';
+        }
+        L.marker([c.lat,c.lng],{icon}).bindPopup(popHtml,{maxWidth:260}).addTo(cmdMarkerLayer);
+
+        // City label
+        const labelIcon=L.divIcon({className:'',html:'<div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.5);text-shadow:0 1px 3px #000;white-space:nowrap;pointer-events:none;transform:translateY('+(sz/2+6)+'px)">'+esc(c.city)+'</div>',iconSize:[80,14],iconAnchor:[40,0]});
+        L.marker([c.lat,c.lng],{icon:labelIcon,interactive:false}).addTo(cmdMarkerLayer);
       });
-    }
+
+      // Connections between cities that share high-risk activity
+      const highCities=cities.filter(c=>c.high_risk>0);
+      for(let i=0;i<highCities.length;i++){
+        for(let j=i+1;j<highCities.length;j++){
+          const a=highCities[i],b=highCities[j];
+          L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{color:'#3b82f6',weight:1,opacity:.25,dashArray:'6,4'}).addTo(cmdConnLayer);
+        }
+      }
+
+      // Heatmap layer (created but not added until toggled)
+      if(heatPts.length){
+        cmdHeatData=heatPts;
+      }
+
+      // Stats overlay
+      document.getElementById('mapTotalCities').textContent=cities.length;
+      document.getElementById('mapHighCount').textContent=totalHigh;
+      document.getElementById('mapFlagCount').textContent=totalFlagged;
+      document.getElementById('mapCaseCount').textContent=totalCases;
+    }catch(e){console.error('Map data:',e)}
     setTimeout(()=>{if(cmdMap)cmdMap.invalidateSize()},200);
   }catch(e){console.error('CMD load:',e)}
 }
@@ -796,7 +1301,20 @@ function rescanWatch(value){
 }
 
 // ── Analytics ──
-let anLoaded=false,anMap=null;
+let anLoaded=false,anMap=null,anMarkerLayer=null,anHeatLayer=null,anHeatData=[];
+let anLayers={markers:true,heat:false};
+function toggleAnLayer(layer){
+  anLayers[layer]=!anLayers[layer];
+  document.getElementById('anBtnMarkers').classList.toggle('active',anLayers.markers);
+  document.getElementById('anBtnHeat').classList.toggle('active',anLayers.heat);
+  if(anLayers.markers){if(!anMap.hasLayer(anMarkerLayer))anMap.addLayer(anMarkerLayer)}
+  else{anMap.removeLayer(anMarkerLayer)}
+  if(anLayers.heat){
+    if(!anHeatLayer&&anHeatData.length)anHeatLayer=L.heatLayer(anHeatData,{radius:30,blur:20,maxZoom:10,
+      gradient:{0.2:'#064e3b',0.4:'#06d6a0',0.6:'#f59e0b',0.8:'#ef4444',1.0:'#7f1d1d'}});
+    if(anHeatLayer&&!anMap.hasLayer(anHeatLayer))anMap.addLayer(anHeatLayer);
+  }else{if(anHeatLayer)anMap.removeLayer(anHeatLayer)}
+}
 async function loadAnalytics(){
   if(anLoaded)return;anLoaded=true;
   try{
@@ -828,19 +1346,673 @@ async function loadAnalytics(){
       data:{labels:d.case_status.map(x=>x.label),datasets:[{data:d.case_status.map(x=>x.value),
         backgroundColor:['#ef4444','#f59e0b','#22c55e','#a78bfa','#06d6a0'],borderWidth:0}]},options:ring});
 
-    anMap=L.map('anMap').setView([22.9,79],4);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-      {attribution:'OpenStreetMap CARTO',maxZoom:19}).addTo(anMap);
+    anMap=L.map('anMap',{zoomControl:true,attributionControl:false}).setView([22.5,82],5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(anMap);
+    anMarkerLayer=L.layerGroup().addTo(anMap);
+    anHeatData=[];
     (d.map_points||[]).forEach(p=>{
-      L.circleMarker([p.lat,p.lng],{radius:5+p.count,color:'#06d6a0',fillColor:'#06d6a0',
-        fillOpacity:.4,weight:1}).bindPopup('<b>'+esc(p.city)+'</b><br>'+p.count+' records').addTo(anMap);
+      const col=p.count>=10?'#ef4444':p.count>=5?'#f59e0b':'#22c55e';
+      const glow=p.count>=10?'0 0 12px rgba(239,68,68,.5)':p.count>=5?'0 0 10px rgba(245,158,11,.4)':'0 0 8px rgba(34,197,94,.3)';
+      const sz=Math.min(6+p.count*1.5,24);
+      anHeatData.push([p.lat,p.lng,p.count*0.5]);
+      // Pulse for large clusters
+      if(p.count>=10){
+        const pulse=L.divIcon({className:'',html:'<div style="width:'+sz*2.5+'px;height:'+sz*2.5+'px;border-radius:50%;border:2px solid '+col+';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);animation:pulse-marker 2s infinite;opacity:.4"></div>',iconSize:[sz*2.5,sz*2.5],iconAnchor:[sz*1.25,sz*1.25]});
+        L.marker([p.lat,p.lng],{icon:pulse,interactive:false}).addTo(anMarkerLayer);
+      }
+      const icon=L.divIcon({className:'',html:'<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+col+';border:2px solid rgba(255,255,255,.3);box-shadow:'+glow+';cursor:pointer"></div>',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
+      const popHtml='<div class="pop-city">'+esc(p.city)+'</div><div class="pop-row"><span class="pop-k">Total Records</span><span class="pop-v">'+(p.count)+'</span></div>';
+      L.marker([p.lat,p.lng],{icon}).bindPopup(popHtml,{maxWidth:220}).addTo(anMarkerLayer);
+      // Label
+      const lbl=L.divIcon({className:'',html:'<div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.45);text-shadow:0 1px 3px #000;white-space:nowrap;pointer-events:none;transform:translateY('+(sz/2+5)+'px)">'+esc(p.city)+'</div>',iconSize:[80,14],iconAnchor:[40,0]});
+      L.marker([p.lat,p.lng],{icon:lbl,interactive:false}).addTo(anMarkerLayer);
     });
     setTimeout(()=>anMap.invalidateSize(),200);
   }catch(e){document.getElementById('anLoad').textContent='Error: '+e.message;anLoaded=false}
 }
 
+// ── Golden Hour ──
+let ghId=null,ghStartTime=null,ghInterval=null;
+
+async function startGoldenHour(){
+  const vn=document.getElementById('ghVictimName').value.trim();
+  const vp=document.getElementById('ghVictimPhone').value.trim();
+  if(!vn||!vp){alert('Victim name and phone are required');return}
+  const body={victim_name:vn,victim_phone:vp,
+    suspect_phone:document.getElementById('ghSuspectPhone').value.trim(),
+    suspect_upi:document.getElementById('ghSuspectUPI').value.trim(),
+    suspect_bank:document.getElementById('ghSuspectBank').value.trim(),
+    suspect_account:document.getElementById('ghSuspectAccount').value.trim(),
+    scam_type:document.getElementById('ghScamType').value,
+    amount_lost:document.getElementById('ghAmount').value||0,
+    description:document.getElementById('ghDesc').value.trim()};
+  try{
+    const r=await(await fetch('/api/golden-hour',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json();
+    if(r.error){alert(r.error);return}
+    ghId=r.id;ghStartTime=new Date();
+    document.getElementById('ghForm').style.display='none';
+    document.getElementById('ghActive').style.display='block';
+    document.getElementById('ghVictimLabel').textContent=vn;
+    document.getElementById('ghSuspectLabel').textContent=body.suspect_phone||body.suspect_upi||'—';
+    document.getElementById('ghAmountLabel').textContent='₹'+(+body.amount_lost).toLocaleString('en-IN');
+    loadGoldenSteps();
+    startGHTimer();
+  }catch(e){alert('Error: '+e.message)}
+}
+
+function startGHTimer(){
+  if(ghInterval)clearInterval(ghInterval);
+  ghInterval=setInterval(()=>{
+    if(!ghStartTime)return;
+    const elapsed=Math.floor((new Date()-ghStartTime)/1000);
+    const remaining=Math.max(7200-elapsed,0);
+    const h=Math.floor(remaining/3600);
+    const m=Math.floor((remaining%3600)/60);
+    const s=remaining%60;
+    const el=document.getElementById('ghTimer');
+    el.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    const pct=(remaining/7200)*100;
+    document.getElementById('ghTimerFill').style.width=pct+'%';
+    if(pct<25){el.style.animation='pulse-threat 1s infinite'}
+    else if(pct<50){el.style.color='#f97316'}
+    if(remaining<=0){el.textContent='00:00:00';el.style.color='var(--muted)';clearInterval(ghInterval)}
+  },1000);
+}
+
+async function loadGoldenSteps(){
+  if(!ghId)return;
+  try{
+    const d=await(await fetch('/api/golden-hour/'+ghId)).json();
+    const steps=d.steps||{};
+    const el=document.getElementById('ghSteps');
+    const order=['scan_suspect','freeze_request','cdr_request','check_watchlist','log_ncrp','generate_report'];
+    const icons=['🔍','🏦','📡','📋','📝','📄'];
+    let html='';
+    order.forEach((key,i)=>{
+      const st=steps[key]||{};
+      const done=st.done;
+      const label=st.label||key;
+      html+='<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border);'+(done?'opacity:.6':'')+'">'+
+        '<div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;'+(done?'background:rgba(34,197,94,.15)':'background:rgba(239,68,68,.1)')+'">'+
+        (done?'✅':icons[i])+'</div>'+
+        '<div style="flex:1"><div style="font-size:13px;font-weight:600;'+(done?'text-decoration:line-through;color:var(--muted)':'')+'">Step '+(i+1)+': '+esc(label)+'</div>'+
+        '<div style="font-size:10px;color:var(--muted);font-family:var(--mono)">'+(done?'Completed':'Pending')+'</div></div>';
+      if(!done){
+        if(key==='scan_suspect')html+='<button class="btn btn-sm btn-primary" onclick="ghScanSuspect()">Run Scan</button>';
+        else if(key==='freeze_request')html+='<button class="btn btn-sm btn-outline" onclick="ghGenNotice()">Generate</button>';
+        else html+='<button class="btn btn-sm btn-outline" onclick="ghMarkStep(\''+key+'\')">Mark Done</button>';
+      }
+      html+='</div>';
+    });
+    el.innerHTML=html;
+    const doneCount=order.filter(k=>(steps[k]||{}).done).length;
+    if(d.scan_results&&Object.keys(d.scan_results).length)renderGHScan(d.scan_results);
+  }catch(e){console.error(e)}
+}
+
+async function ghScanSuspect(){
+  if(!ghId)return;
+  document.getElementById('ghScanResults').innerHTML='<div class="loading">Scanning all databases...</div>';
+  try{
+    const d=await(await fetch('/api/golden-hour/'+ghId+'/scan',{method:'POST'})).json();
+    renderGHScan(d);
+    loadGoldenSteps();
+  }catch(e){document.getElementById('ghScanResults').innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>'}
+}
+
+function renderGHScan(scan){
+  let html='';
+  if(scan.phone){
+    const p=scan.phone;
+    const c=bandColor(p.score);
+    html+='<div style="margin-bottom:10px"><span style="font-family:var(--mono);font-weight:700;color:'+c+'">'+p.score+'/100</span> <span style="color:var(--dim)">'+esc(p.value)+'</span></div>';
+    html+=factorChips(p.factors);
+    if(p.aadhaar)html+='<div style="margin-top:8px;font-size:12px">'+row('Name',p.aadhaar.name)+row('Aadhaar',p.aadhaar.aadhaar_id)+row('Flagged',p.aadhaar.flagged==='True'?'YES':'No',p.aadhaar.flagged==='True')+'</div>';
+    if(p.banking)html+='<div style="margin-top:6px;font-size:12px">'+row('UPI',p.banking.upi_id)+row('Bank',p.banking.bank)+row('Susp. Txns',p.banking.suspicious_transactions)+'</div>';
+    if(p.cctns&&p.cctns.length)html+='<div style="margin-top:6px;font-size:12px;color:var(--red)">'+p.cctns.length+' CCTNS case(s) found</div>';
+  }
+  if(scan.upi){
+    html+='<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">';
+    html+=scan.upi.found?'<span style="color:var(--red)">UPI ID found in banking database</span>':'<span style="color:var(--muted)">UPI ID not in local database</span>';
+    html+='</div>';
+  }
+  if(!html)html='<div class="empty">No data found for suspect identifiers</div>';
+  document.getElementById('ghScanResults').innerHTML=html;
+}
+
+async function ghGenNotice(){
+  if(!ghId)return;
+  document.getElementById('ghNotices').innerHTML='<div class="loading">Generating legal notices...</div>';
+  try{
+    const d=await(await fetch('/api/golden-hour/'+ghId+'/notice')).json();
+    const n=d.notice;
+    let html='<div style="margin-bottom:10px"><b style="color:var(--accent)">'+esc(n.type)+'</b></div>';
+    html+='<div style="font-size:11px;color:var(--muted);margin-bottom:6px">To: '+esc(n.to)+'</div>';
+    html+='<div style="font-size:11px;color:var(--muted);margin-bottom:10px">Subject: '+esc(n.subject)+'</div>';
+    html+='<pre style="white-space:pre-wrap;font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.6;background:var(--bg);padding:12px;border-radius:8px;border:1px solid var(--border);max-height:300px;overflow-y:auto">'+esc(n.body)+'</pre>';
+    html+='<button class="btn btn-sm btn-outline" style="margin-top:8px" onclick="window.print()">Print Notice</button>';
+    document.getElementById('ghNotices').innerHTML=html;
+    await fetch('/api/golden-hour/'+ghId+'/step',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({step:'freeze_request',done:true})});
+    loadGoldenSteps();
+  }catch(e){document.getElementById('ghNotices').innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>'}
+}
+
+async function ghMarkStep(key){
+  if(!ghId)return;
+  await fetch('/api/golden-hour/'+ghId+'/step',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({step:key,done:true})});
+  loadGoldenSteps();
+}
+
+async function closeGoldenHour(){
+  if(!ghId)return;
+  if(!confirm('Close this Golden Hour case?'))return;
+  await fetch('/api/golden-hour/'+ghId+'/close',{method:'POST'});
+  ghId=null;ghStartTime=null;if(ghInterval)clearInterval(ghInterval);
+  document.getElementById('ghActive').style.display='none';
+  document.getElementById('ghForm').style.display='block';
+  loadGHHistory();
+}
+
+async function loadGHHistory(){
+  try{
+    const cases=await(await fetch('/api/golden-hour')).json();
+    const el=document.getElementById('ghHistory');
+    if(!cases.length){el.innerHTML='<div class="empty">No previous cases</div>';return}
+    let html='<table class="tbl"><thead><tr><th>ID</th><th>Victim</th><th>Suspect</th><th>Type</th><th>Amount</th><th>Status</th><th>Started</th></tr></thead><tbody>';
+    cases.forEach(c=>{
+      const sc=c.status==='active'?'color:var(--red)':'color:var(--green)';
+      html+='<tr><td style="font-family:var(--mono)">#'+c.id+'</td>'+
+        '<td>'+esc(c.victim_name)+'</td>'+
+        '<td style="font-family:var(--mono)">'+esc(c.suspect_phone||c.suspect_upi||'—')+'</td>'+
+        '<td style="font-size:12px">'+esc(c.scam_type)+'</td>'+
+        '<td style="font-family:var(--mono)">₹'+(+c.amount_lost).toLocaleString('en-IN')+'</td>'+
+        '<td style="'+sc+';font-weight:700;font-size:11px;text-transform:uppercase">'+esc(c.status)+'</td>'+
+        '<td style="font-size:11px;color:var(--muted)">'+esc((c.started_at||'').replace('T',' ').slice(0,16))+'</td></tr>';
+    });
+    el.innerHTML=html+'</tbody></table>';
+  }catch(e){}
+}
+
+// ── Section 94 Notice Generator ──
+async function generateNotice(){
+  const phone=document.getElementById('s94Phone').value.trim();
+  const upi=document.getElementById('s94UPI').value.trim();
+  const bank=document.getElementById('s94Bank').value.trim();
+  const account=document.getElementById('s94Account').value.trim();
+  const victim=document.getElementById('s94Victim').value.trim();
+  const amount=document.getElementById('s94Amount').value||0;
+  const fir=document.getElementById('s94FIR').value.trim();
+  const ntype=document.getElementById('s94Type').value;
+
+  if(!phone&&!upi){alert('Enter suspect phone or UPI ID');return}
+
+  let score=0,factors=[],intelHtml='';
+  if(phone){
+    const r=await(await fetch('/api/search?q='+encodeURIComponent(phone))).json();
+    score=r.risk_score||0;factors=r.risk_factors||[];
+    intelHtml+='<div style="margin-bottom:8px"><span style="font-family:var(--mono);font-weight:700;color:'+bandColor(score)+'">'+score+'/100 '+bandName(score)+'</span> — '+esc(phone)+'</div>';
+    intelHtml+=factorChips(factors);
+    if(r.aadhaar)intelHtml+='<div style="margin-top:6px;font-size:12px">'+row('Name',r.aadhaar.name)+row('Flagged',r.aadhaar.flagged==='True'?'YES':'No',r.aadhaar.flagged==='True')+'</div>';
+    if(r.cctns_cases&&r.cctns_cases.length)intelHtml+='<div style="margin-top:4px;color:var(--red);font-size:12px;font-weight:700">'+r.cctns_cases.length+' CCTNS case(s) on record</div>';
+  }
+  document.getElementById('s94Intel').innerHTML=intelHtml||'<div class="empty">No suspect phone provided</div>';
+
+  const now=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+  const bankNotice=
+    `OFFICE OF THE SUPERINTENDENT OF POLICE (CYBER CRIME)\nGURUGRAM, HARYANA\n\n`+
+    `No. Cyber/SCINT/${Date.now().toString(36).toUpperCase()}     Dated: ${now}\n\n`+
+    `To,\nThe Nodal Officer (Cyber Cell / Fraud Risk)\n${bank||'[Bank Name]'}\n\n`+
+    `Subject: Requisition under Section 94 BNSS, 2023 — Immediate freeze of account linked to cyber fraud\n`+
+    `Reference: ${fir||'[FIR Number]'}\n\n`+
+    `Sir/Madam,\n\n`+
+    `Under the provisions of Section 94 of the Bharatiya Nagarik Suraksha Sanhita (BNSS), 2023 `+
+    `(erstwhile Section 91 CrPC), you are hereby directed to:\n\n`+
+    `1. IMMEDIATELY FREEZE the following account(s) and linked wallets:\n\n`+
+    `   Phone Number   : ${phone||'N/A'}\n`+
+    `   UPI ID         : ${upi||'N/A'}\n`+
+    `   Bank           : ${bank||'N/A'}\n`+
+    `   Account No.    : ${account||'N/A'}\n\n`+
+    `2. FURNISH the following within 72 hours:\n`+
+    `   a) Complete KYC details of the account holder\n`+
+    `   b) Account opening form and documents\n`+
+    `   c) Last 6 months statement of transactions\n`+
+    `   d) IP address logs for last 90 days\n`+
+    `   e) Details of linked beneficiaries\n`+
+    `   f) Mobile numbers registered with the account\n\n`+
+    `3. COMPLAINANT DETAILS:\n`+
+    `   Name           : ${victim||'[Victim Name]'}\n`+
+    `   Amount Lost    : ₹${(+amount).toLocaleString('en-IN')}\n\n`+
+    `4. INTELLIGENCE ASSESSMENT (SCINT Platform):\n`+
+    `   Risk Score     : ${score}/100 (${bandName(score)})\n`+
+    `   Risk Factors   : ${factors.length?factors.join(', '):'Under investigation'}\n\n`+
+    `Non-compliance shall attract proceedings under Section 229 of the Bharatiya Nyaya Sanhita (BNS), 2023.\n\n`+
+    `This is computer-generated via SCINT Intelligence Platform and bears digital authentication.\n\n`+
+    `Yours faithfully,\n\n\n`+
+    `[Name & Signature]\n`+
+    `[Designation]\n`+
+    `Cyber Crime Police Station, Gurugram\n`+
+    `Phone: [Contact] | Email: [Email]\n`;
+
+  const telecomNotice=
+    `OFFICE OF THE SUPERINTENDENT OF POLICE (CYBER CRIME)\nGURUGRAM, HARYANA\n\n`+
+    `No. Cyber/CDR/${Date.now().toString(36).toUpperCase()}     Dated: ${now}\n\n`+
+    `To,\nThe Nodal Officer (Law Enforcement)\n[Telecom Service Provider]\n\n`+
+    `Subject: Requisition under Section 91 BNSS, 2023 — Production of CDR/IPDR\n`+
+    `Reference: ${fir||'[FIR Number]'}\n\n`+
+    `Sir/Madam,\n\n`+
+    `Under Section 91 of BNSS 2023, you are directed to produce:\n\n`+
+    `1. CDR (Call Detail Records) of ${phone||'[Number]'} for last 90 days\n`+
+    `2. IPDR (Internet Protocol Detail Records) for last 90 days\n`+
+    `3. Tower location data / cell tower dumps for relevant dates\n`+
+    `4. IMEI number(s) associated with the SIM\n`+
+    `5. CAF (Customer Acquisition Form) / KYC documents\n`+
+    `6. Recharge history and payment mode\n`+
+    `7. SIM swap history if any\n\n`+
+    `Data should be provided in soft copy (Excel/CSV) within 72 hours.\n\n`+
+    `Non-compliance is punishable under Section 229 BNS, 2023.\n\n`+
+    `[Name & Signature]\n`+
+    `Cyber Crime Police Station, Gurugram\n`;
+
+  document.getElementById('s94BankNotice').textContent=bankNotice;
+  document.getElementById('s94Output').style.display='block';
+
+  if(ntype==='telecom'||ntype==='both'){
+    document.getElementById('s94TelecomCard').style.display='block';
+    document.getElementById('s94TelecomNotice').textContent=telecomNotice;
+  }else{document.getElementById('s94TelecomCard').style.display='none'}
+}
+
+function printNotice(){
+  const bankText=document.getElementById('s94BankNotice').textContent;
+  const w=window.open('','','width=800,height=1000');
+  w.document.write('<html><head><title>Section 94 BNSS Notice — SCINT</title><style>body{font-family:monospace;font-size:13px;line-height:1.7;padding:40px;white-space:pre-wrap;color:#111}@media print{body{padding:20px}}</style></head><body>'+bankText.replace(/</g,'&lt;')+'</body></html>');
+  w.document.close();w.print();
+}
+
+// ── Complaint Clustering ──
+async function addComplaint(){
+  const vn=document.getElementById('clVictim').value.trim();
+  if(!vn){alert('Victim name required');return}
+  const body={
+    victim_name:vn,victim_phone:document.getElementById('clPhone').value.trim(),
+    suspect_indicators:document.getElementById('clIOC').value.trim(),
+    scam_type:document.getElementById('clType').value,
+    amount:document.getElementById('clAmount').value||0,
+    description:document.getElementById('clDesc').value.trim(),
+    state:document.getElementById('clState').value};
+  await fetch('/api/complaints',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  document.getElementById('clVictim').value='';document.getElementById('clPhone').value='';
+  document.getElementById('clIOC').value='';document.getElementById('clAmount').value='';
+  document.getElementById('clDesc').value='';
+  loadComplaints();
+}
+
+async function loadComplaints(){
+  try{
+    const data=await(await fetch('/api/complaints')).json();
+    const el=document.getElementById('clTable');
+    if(!data.length){el.innerHTML='<div class="empty">No complaints filed yet</div>';return}
+    let h='<table class="tbl"><thead><tr><th>#</th><th>Victim</th><th>Type</th><th>Indicators</th><th>Amount</th><th>State</th><th>Cluster</th><th>Filed</th></tr></thead><tbody>';
+    data.forEach(c=>{
+      const clr=c.cluster_id>0?'background:rgba(6,214,160,.15);color:var(--accent)':'color:var(--muted)';
+      h+='<tr><td style="font-family:var(--mono)">'+c.id+'</td>'+
+        '<td>'+esc(c.victim_name)+'</td>'+
+        '<td style="font-size:11px">'+esc(c.scam_type)+'</td>'+
+        '<td style="font-family:var(--mono);font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis">'+esc(c.suspect_indicators)+'</td>'+
+        '<td style="font-family:var(--mono)">₹'+(+c.amount).toLocaleString('en-IN')+'</td>'+
+        '<td style="font-size:11px">'+esc(c.state)+'</td>'+
+        '<td><span style="font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;'+clr+'">'+(c.cluster_id>0?'C-'+c.cluster_id:'—')+'</span></td>'+
+        '<td style="font-size:11px;color:var(--muted)">'+esc((c.filed_at||'').replace('T',' ').slice(0,16))+'</td></tr>';
+    });
+    el.innerHTML=h+'</tbody></table>';
+  }catch(e){}
+}
+
+async function runClustering(){
+  const el=document.getElementById('clusterResults');
+  el.innerHTML='<div class="loading" style="margin-bottom:14px">Running clustering engine — matching shared IOCs across all complaints...</div>';
+  try{
+    const d=await(await fetch('/api/complaints/cluster',{method:'POST'})).json();
+    if(d.error){el.innerHTML='<div class="card"><div class="empty">'+esc(d.error)+'</div></div>';return}
+    let html='<div class="metrics" style="margin-bottom:14px">'+
+      '<div class="metric m-accent"><div class="val">'+d.total_complaints+'</div><div class="lbl">Total Complaints</div></div>'+
+      '<div class="metric m-red"><div class="val">'+d.clusters_found+'</div><div class="lbl">Clusters Found</div></div>'+
+      '<div class="metric m-amber"><div class="val">'+d.unclustered+'</div><div class="lbl">Unclustered</div></div></div>';
+
+    if(d.clusters&&d.clusters.length){
+      d.clusters.forEach(cl=>{
+        const severity=cl.count>=5?'card-alert':'';
+        html+='<div class="card '+severity+'" style="margin-bottom:12px">'+
+          '<div class="card-title"><span class="dot" style="background:'+(cl.count>=5?'var(--red)':'var(--accent)')+'"></span>'+
+          'Cluster #'+cl.cluster_id+' — '+cl.count+' Linked Complaints</div>';
+        html+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;font-size:12px">'+
+          '<span style="color:var(--muted)">Total Loss: <b style="color:var(--red)">₹'+cl.total_amount.toLocaleString('en-IN')+'</b></span>'+
+          '<span style="color:var(--muted)">States: <b style="color:var(--text)">'+esc(cl.states.join(', '))+'</b></span>'+
+          '<span style="color:var(--muted)">Types: <b style="color:var(--text)">'+esc(cl.scam_types.join(', '))+'</b></span></div>';
+        html+='<div style="margin-bottom:10px"><span style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase">Shared IOCs:</span><div class="chips" style="margin-top:4px">';
+        cl.shared_iocs.forEach(ioc=>{html+='<span class="chip" style="cursor:default;font-size:11px">'+esc(ioc)+'</span>'});
+        html+='</div></div>';
+        html+='<table class="tbl" style="font-size:12px"><thead><tr><th>Victim</th><th>Phone</th><th>Type</th><th>Amount</th><th>State</th></tr></thead><tbody>';
+        cl.complaints.forEach(c=>{
+          html+='<tr><td>'+esc(c.victim_name)+'</td><td style="font-family:var(--mono)">'+esc(c.victim_phone)+'</td>'+
+            '<td>'+esc(c.scam_type)+'</td><td style="font-family:var(--mono)">₹'+(+c.amount).toLocaleString('en-IN')+'</td>'+
+            '<td>'+esc(c.state)+'</td></tr>';
+        });
+        html+='</tbody></table></div>';
+      });
+    }else{
+      html+='<div class="card"><div class="empty">No clusters found — complaints have no shared IOCs</div></div>';
+    }
+    el.innerHTML=html;
+    loadComplaints();
+  }catch(e){el.innerHTML='<div class="card"><div class="empty">Error: '+esc(e.message)+'</div></div>'}
+}
+
+// ── Digital Arrest Detector ──
+async function detectDigitalArrest(){
+  const text=document.getElementById('daText').value.trim();
+  const el=document.getElementById('daResults');
+  if(!text){el.innerHTML='';return}
+  el.innerHTML='<div class="loading">Analyzing for digital arrest patterns...</div>';
+  try{
+    const d=await(await fetch('/api/detect-digital-arrest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})})).json();
+    if(d.error){el.innerHTML='<div class="empty">'+esc(d.error)+'</div>';return}
+    const sc=d.score;
+    const sevColor=d.severity==='CRITICAL'?'var(--red)':d.severity==='HIGH'?'#f97316':d.severity==='MEDIUM'?'var(--amber)':'var(--green)';
+    let html='<div class="scorecard" style="border-color:'+sevColor+'">'+gaugeHTML(sc,d.severity)+
+      '<div class="sc-info"><h2 style="color:'+sevColor+'">'+esc(d.verdict)+'</h2>'+
+      '<div style="font-size:13px;color:var(--dim);margin-top:6px;line-height:1.6">'+esc(d.action)+'</div></div></div>';
+
+    if(d.flags&&d.flags.length){
+      html+='<div class="card" style="margin-bottom:14px"><div class="card-title"><span class="dot" style="background:var(--red)"></span>Red Flags Detected ('+d.total_flags+')</div>';
+      d.flags.forEach(f=>{
+        const pct=Math.round(f.score/f.max*100);
+        html+='<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">'+
+          '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">'+esc(f.category)+'</div>'+
+          '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">'+f.matched.map(m=>'<span class="chip" style="cursor:default;font-size:10px;padding:2px 8px;border-color:rgba(239,68,68,.4);color:#fca5a5">'+esc(m)+'</span>').join('')+'</div></div>'+
+          '<div style="width:80px"><div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+sevColor+';border-radius:3px"></div></div>'+
+          '<div style="font-size:10px;color:var(--muted);text-align:center;margin-top:2px;font-family:var(--mono)">'+f.score+'/'+f.max+'</div></div></div>';
+      });
+      html+='</div>';
+    }
+
+    const ex=d.extracted||{};
+    if((ex.phones&&ex.phones.length)||(ex.upis&&ex.upis.length)||(ex.accounts&&ex.accounts.length)){
+      html+='<div class="card" style="margin-bottom:14px"><div class="card-title"><span class="dot" style="background:var(--amber)"></span>Extracted Identifiers</div>';
+      if(ex.phones&&ex.phones.length)html+='<div style="margin-bottom:6px"><span style="font-size:11px;color:var(--muted);font-weight:700">Phones:</span> '+ex.phones.map(p=>'<span class="chip" style="cursor:pointer;font-size:11px" onclick="scanFromDA(\''+esc(p)+'\')">'+esc(p)+' →</span>').join(' ')+'</div>';
+      if(ex.upis&&ex.upis.length)html+='<div style="margin-bottom:6px"><span style="font-size:11px;color:var(--muted);font-weight:700">UPI IDs:</span> '+ex.upis.map(u=>'<span class="chip" style="cursor:default;font-size:11px">'+esc(u)+'</span>').join(' ')+'</div>';
+      if(ex.accounts&&ex.accounts.length)html+='<div><span style="font-size:11px;color:var(--muted);font-weight:700">Accounts:</span> '+ex.accounts.map(a=>'<span class="chip" style="cursor:default;font-size:11px">'+esc(a)+'</span>').join(' ')+'</div>';
+      html+='</div>';
+    }
+
+    html+='<div class="card"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>Government Advisory</div>';
+    (d.advisory||[]).forEach((a,i)=>{
+      html+='<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12.5px;color:var(--dim)">'+
+        '<span style="color:var(--accent);font-weight:700;font-family:var(--mono);flex-shrink:0">'+(i+1)+'.</span>'+esc(a)+'</div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>'}
+}
+function scanFromDA(phone){
+  document.getElementById('intelInput').value=phone;
+  document.querySelectorAll('.nav-item').forEach(x=>{x.classList.remove('active');if(x.dataset.p==='intel')x.classList.add('active')});
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  document.getElementById('p-intel').classList.add('active');
+  intelSearch();
+}
+
+// ── SMS Classifier ──
+const SMS_DEMOS={
+  kyc:'Dear Customer, Your SBI KYC has expired. Update immediately to avoid account suspension. Click: http://bit.ly/sbi-kyc-update or call 9876543210. Ignore if already done.',
+  job:'Earn ₹5000-₹10000 daily from home! Simple data entry work. No experience needed. Join our WhatsApp group now: https://wa.me/919988776655. Limited spots available!',
+  lottery:'CONGRATULATIONS! Your mobile number 98XXXXXX has won ₹25,00,000 in Jio Lucky Draw 2026. To claim, send ₹999 processing fee to ramesh@ybl. Call: 8877665544'
+};
+function demoSMS(type){document.getElementById('smsText').value=SMS_DEMOS[type];classifySMS()}
+async function classifySMS(){
+  const text=document.getElementById('smsText').value.trim();
+  const el=document.getElementById('smsResults');
+  if(!text){el.innerHTML='';return}
+  el.innerHTML='<div class="loading">Classifying SMS and extracting IOCs...</div>';
+  try{
+    const d=await(await fetch('/api/classify-sms',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})})).json();
+    if(d.error){el.innerHTML='<div class="empty">'+esc(d.error)+'</div>';return}
+    const sevColor=d.severity==='CRITICAL'?'var(--red)':d.severity==='HIGH'?'#f97316':d.severity==='MEDIUM'?'var(--amber)':'var(--green)';
+    let html='<div class="scorecard" style="border-color:'+sevColor+'">'+gaugeHTML(d.risk_score,d.severity)+
+      '<div class="sc-info"><h2>'+(d.is_scam?'<span style="color:var(--red)">SCAM DETECTED</span>':'<span style="color:var(--green)">Likely Legitimate</span>')+'</h2>'+
+      '<div class="q">Classification: <b style="color:'+sevColor+'">'+esc(d.classification)+'</b></div>';
+    if(d.all_matches&&d.all_matches.length>1){
+      html+='<div class="factors" style="margin-top:8px">';
+      d.all_matches.forEach(m=>{
+        const mc=m.severity==='CRITICAL'?'background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:#fca5a5':
+          m.severity==='HIGH'?'background:rgba(249,115,22,.12);border-color:rgba(249,115,22,.4);color:#fdba74':'';
+        html+='<span class="factor" style="'+mc+'">'+esc(m.type)+' ('+m.confidence+'%)</span>';
+      });
+      html+='</div>';
+    }
+    html+='</div></div>';
+
+    const iocs=d.iocs||{};
+    if(iocs.total>0){
+      html+='<div class="card" style="margin-bottom:14px"><div class="card-title"><span class="dot" style="background:var(--red)"></span>Extracted IOCs ('+iocs.total+')</div>';
+      if(iocs.phones&&iocs.phones.length)html+='<div style="margin-bottom:8px">'+row('Phones',iocs.phones.join(', '),true)+'</div>';
+      if(iocs.urls&&iocs.urls.length){html+='<div style="margin-bottom:8px">';iocs.urls.forEach(u=>{html+=row('URL',u,true)});html+='</div>';}
+      if(iocs.upis&&iocs.upis.length)html+='<div style="margin-bottom:8px">'+row('UPI IDs',iocs.upis.join(', '),true)+'</div>';
+      if(iocs.accounts&&iocs.accounts.length)html+='<div style="margin-bottom:8px">'+row('Account Numbers',iocs.accounts.join(', '),true)+'</div>';
+      if(iocs.emails&&iocs.emails.length)html+='<div>'+row('Emails',iocs.emails.join(', '),true)+'</div>';
+      html+='<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">';
+      iocs.phones.forEach(p=>{html+='<button class="btn btn-sm btn-outline" onclick="scanFromDA(\''+esc(p)+'\')">Scan '+esc(p)+'</button>'});
+      html+='</div></div>';
+    }
+
+    if(d.all_matches&&d.all_matches.length){
+      html+='<div class="card"><div class="card-title"><span class="dot" style="background:var(--amber)"></span>Pattern Matches</div>';
+      d.all_matches.forEach(m=>{
+        html+='<div style="padding:8px 0;border-bottom:1px solid var(--border)">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center">'+
+          '<span style="font-weight:600;font-size:13px">'+esc(m.type)+'</span>'+
+          '<span class="priority-badge p-'+(m.severity==='CRITICAL'?'critical':m.severity==='HIGH'?'high':'medium')+'">'+esc(m.severity)+'</span></div>'+
+          '<div class="chips" style="margin-top:4px">'+m.matched.map(k=>'<span class="chip" style="cursor:default;font-size:10px;padding:2px 8px">'+esc(k)+'</span>').join('')+'</div></div>';
+      });
+      html+='</div>';
+    }
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>'}
+}
+
+// ── Financial Flow Visualizer ──
+let flowNetwork=null;
+function loadDemoFlow(){
+  document.getElementById('flowText').value=
+    'Victim_Raju → 9876543210@ybl → 50000\n'+
+    'Victim_Priya → 9876543210@ybl → 30000\n'+
+    'Victim_Suresh → 9876543210@ybl → 25000\n'+
+    '9876543210@ybl → MuleAcc_SBI_4521 → 95000\n'+
+    'MuleAcc_SBI_4521 → CashOut_ATM_Delhi → 60000\n'+
+    'MuleAcc_SBI_4521 → CashOut_Paytm → 20000\n'+
+    'MuleAcc_SBI_4521 → Hawala_Agent_X → 15000\n'+
+    'Victim_Meena → fraud@axl → 40000\n'+
+    'fraud@axl → MuleAcc_PNB_8832 → 38000\n'+
+    'MuleAcc_PNB_8832 → CashOut_ATM_Mumbai → 35000';
+  visualizeFlow();
+}
+async function visualizeFlow(){
+  const text=document.getElementById('flowText').value.trim();
+  const el=document.getElementById('flowStats');
+  const graphEl=document.getElementById('flowGraph');
+  const muleEl=document.getElementById('flowMules');
+  if(!text){el.innerHTML='';graphEl.style.display='none';muleEl.innerHTML='';return}
+
+  const lines=text.split('\n').filter(l=>l.trim());
+  const transactions=[];
+  for(const line of lines){
+    const parts=line.split(/[→\->]+/).map(p=>p.trim()).filter(Boolean);
+    if(parts.length>=3){
+      transactions.push({from:parts[0],to:parts[1],amount:parseFloat(parts[2])||0});
+    }else if(parts.length===2){
+      transactions.push({from:parts[0],to:parts[1],amount:0});
+    }
+  }
+  if(!transactions.length){el.innerHTML='<div class="empty">Could not parse transactions. Use format: sender → receiver → amount</div>';return}
+
+  el.innerHTML='<div class="loading">Analyzing money flow patterns...</div>';
+  try{
+    const d=await(await fetch('/api/financial-flow',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transactions})})).json();
+    if(d.error){el.innerHTML='<div class="empty">'+esc(d.error)+'</div>';return}
+
+    el.innerHTML='<div class="metrics" style="margin-bottom:14px">'+
+      '<div class="metric m-purple"><div class="val">₹'+(d.total_flow/1000).toFixed(0)+'K</div><div class="lbl">Total Flow</div></div>'+
+      '<div class="metric m-blue"><div class="val">'+d.total_accounts+'</div><div class="lbl">Accounts</div></div>'+
+      '<div class="metric m-amber"><div class="val">'+d.total_transactions+'</div><div class="lbl">Transactions</div></div>'+
+      '<div class="metric m-red"><div class="val">'+d.mule_suspects.length+'</div><div class="lbl">Mule Suspects</div></div></div>';
+
+    // Build vis-network graph
+    graphEl.style.display='block';
+    const roleColors={
+      source:{background:'#3b82f6',border:'#93c5fd'},
+      mule:{background:'#ef4444',border:'#fca5a5'},
+      sink:{background:'#22c55e',border:'#86efac'},
+      intermediate:{background:'#f59e0b',border:'#fcd34d'}
+    };
+    const roleShapes={source:'dot',mule:'diamond',sink:'triangle',intermediate:'dot'};
+    const visNodes=d.nodes.map(n=>({
+      id:n.id,label:n.label+'\n₹'+n.inflow.toLocaleString('en-IN')+' in\n₹'+n.outflow.toLocaleString('en-IN')+' out',
+      color:roleColors[n.role]||roleColors.intermediate,
+      shape:roleShapes[n.role]||'dot',
+      size:n.role==='mule'?30:n.role==='source'?22:18,
+      font:{color:'#fff',size:10,face:'JetBrains Mono'},
+      title:n.role.toUpperCase()+' | In: ₹'+n.inflow.toLocaleString('en-IN')+' | Out: ₹'+n.outflow.toLocaleString('en-IN')
+    }));
+    const visEdges=d.edges.map((e,i)=>({
+      id:'e'+i,from:e.from,to:e.to,
+      label:e.label,
+      arrows:'to',
+      color:{color:'rgba(167,139,250,.5)',highlight:'#a78bfa'},
+      font:{color:'#94a3b8',size:10,strokeWidth:0},
+      width:Math.max(1,Math.min(6,e.amount/10000)),
+      smooth:{type:'curvedCW',roundness:0.2}
+    }));
+    const data={nodes:new vis.DataSet(visNodes),edges:new vis.DataSet(visEdges)};
+    const options={
+      nodes:{borderWidth:2},
+      edges:{smooth:{type:'curvedCW'}},
+      physics:{stabilization:true,barnesHut:{springLength:180,gravitationalConstant:-6000}},
+      interaction:{hover:true,tooltipDelay:100},
+      layout:{improvedLayout:true}
+    };
+    if(flowNetwork)flowNetwork.destroy();
+    flowNetwork=new vis.Network(graphEl,data,options);
+
+    // Legend
+    el.innerHTML+='<div style="display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:-6px;margin-bottom:10px">'+
+      '<span style="color:#3b82f6">● Source (Victim)</span>'+
+      '<span style="color:#ef4444">◆ Mule Account</span>'+
+      '<span style="color:#22c55e">▲ Cash-Out / Sink</span>'+
+      '<span style="color:#f59e0b">● Intermediate</span></div>';
+
+    // Mule suspects
+    if(d.mule_suspects&&d.mule_suspects.length){
+      let mh='<div class="card card-alert"><div class="card-title"><span class="dot" style="background:var(--red)"></span>Mule Account Suspects</div>';
+      mh+='<table class="tbl"><thead><tr><th>Account</th><th>Inflow</th><th>Outflow</th><th>Pass-Through %</th><th>Assessment</th></tr></thead><tbody>';
+      d.mule_suspects.forEach(m=>{
+        const risk=m.pass_through_pct>=90?'CONFIRMED MULE':m.pass_through_pct>=70?'LIKELY MULE':'SUSPECT';
+        const rc=m.pass_through_pct>=90?'var(--red)':m.pass_through_pct>=70?'#f97316':'var(--amber)';
+        mh+='<tr><td style="font-family:var(--mono);font-weight:600">'+esc(m.account)+'</td>'+
+          '<td style="font-family:var(--mono);color:var(--green)">₹'+m.inflow.toLocaleString('en-IN')+'</td>'+
+          '<td style="font-family:var(--mono);color:var(--red)">₹'+m.outflow.toLocaleString('en-IN')+'</td>'+
+          '<td style="font-family:var(--mono);font-weight:800;color:'+rc+'">'+m.pass_through_pct+'%</td>'+
+          '<td><span class="priority-badge" style="background:'+rc+'22;color:'+rc+'">'+risk+'</span></td></tr>';
+      });
+      mh+='</tbody></table></div>';
+      muleEl.innerHTML=mh;
+    }else{muleEl.innerHTML=''}
+  }catch(e){el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>';graphEl.style.display='none'}
+}
+
+// ── Investigation Playbook ──
+async function loadPlaybook(){
+  const type=document.getElementById('pbType').value;
+  const el=document.getElementById('pbResults');
+  if(!type){el.innerHTML='';return}
+  el.innerHTML='<div class="loading">Generating investigation playbook...</div>';
+  try{
+    const d=await(await fetch('/api/playbook',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scam_type:type})})).json();
+    if(d.error){el.innerHTML='<div class="empty">'+esc(d.error)+'</div>';return}
+    const pc=d.priority==='CRITICAL'?'var(--red)':d.priority==='HIGH'?'#f97316':'var(--amber)';
+    let html='<div class="metrics" style="margin-bottom:14px">'+
+      '<div class="metric m-blue"><div class="val">'+d.steps.length+'</div><div class="lbl">Steps</div></div>'+
+      '<div class="metric" style="border-top:2px solid '+pc+'"><div class="val" style="color:'+pc+'">'+esc(d.priority)+'</div><div class="lbl">Priority</div></div>'+
+      '<div class="metric m-'+(d.golden_hour?'red':'green')+'"><div class="val">'+(d.golden_hour?'YES':'NO')+'</div><div class="lbl">Golden Hour</div></div></div>';
+    html+='<div class="card"><div class="card-title"><span class="dot" style="background:'+pc+'"></span>'+esc(type)+' — Investigation Playbook</div>';
+    d.steps.forEach((s,i)=>{
+      html+='<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);align-items:flex-start">'+
+        '<div style="width:32px;height:32px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent)">'+(i+1)+'</div>'+
+        '<div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text);line-height:1.5">'+esc(s.step)+'</div>'+
+        '<div style="display:flex;gap:12px;margin-top:4px;font-size:10px;color:var(--muted);font-family:var(--mono)">'+
+        '<span>Agency: <b style="color:var(--blue)">'+esc(s.agency)+'</b></span>'+
+        '<span>Timeline: <b style="color:var(--amber)">'+esc(s.time)+'</b></span></div></div>'+
+        '<input type="checkbox" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--accent);cursor:pointer" title="Mark complete"></div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>'}
+}
+
+// ── Victim Impact Calculator ──
+async function calcImpact(){
+  const el=document.getElementById('impactResults');
+  el.innerHTML='<div class="loading">Calculating aggregate impact...</div>';
+  try{
+    const d=await(await fetch('/api/victim-impact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})})).json();
+    if(d.error){el.innerHTML='<div class="empty">'+esc(d.error)+'</div>';return}
+    let html='<div class="metrics">'+
+      '<div class="metric m-red"><div class="val">'+d.total_victims+'</div><div class="lbl">Total Victims</div></div>'+
+      '<div class="metric m-amber"><div class="val">₹'+(d.total_amount_lost/100000).toFixed(1)+'L</div><div class="lbl">Total Loss</div></div>'+
+      '<div class="metric m-blue"><div class="val">₹'+Math.round(d.average_loss).toLocaleString('en-IN')+'</div><div class="lbl">Avg. Loss</div></div>'+
+      '<div class="metric m-purple"><div class="val">₹'+Math.round(d.max_single_loss).toLocaleString('en-IN')+'</div><div class="lbl">Max Single Loss</div></div></div>';
+
+    html+='<div class="grid2">';
+    html+='<div class="card"><div class="card-title"><span class="dot" style="background:var(--red)"></span>Impact by Scam Type</div>';
+    if(d.by_scam_type&&d.by_scam_type.length){
+      html+='<table class="tbl"><thead><tr><th>Type</th><th>Victims</th><th>Total Loss</th></tr></thead><tbody>';
+      d.by_scam_type.forEach(t=>{
+        html+='<tr><td style="font-weight:600">'+esc(t.type)+'</td><td style="font-family:var(--mono)">'+t.count+'</td>'+
+          '<td style="font-family:var(--mono);color:var(--red);font-weight:700">₹'+t.amount.toLocaleString('en-IN')+'</td></tr>';
+      });
+      html+='</tbody></table>';
+    }else html+='<div class="empty">No data</div>';
+    html+='</div>';
+
+    html+='<div class="card"><div class="card-title"><span class="dot" style="background:var(--amber)"></span>Impact by State</div>';
+    if(d.by_state&&d.by_state.length){
+      html+='<table class="tbl"><thead><tr><th>State</th><th>Victims</th><th>Total Loss</th></tr></thead><tbody>';
+      d.by_state.forEach(s=>{
+        html+='<tr><td style="font-weight:600">'+esc(s.state)+'</td><td style="font-family:var(--mono)">'+s.count+'</td>'+
+          '<td style="font-family:var(--mono);color:var(--red);font-weight:700">₹'+s.amount.toLocaleString('en-IN')+'</td></tr>';
+      });
+      html+='</tbody></table>';
+    }else html+='<div class="empty">No data</div>';
+    html+='</div></div>';
+
+    // Chart
+    if(d.by_scam_type&&d.by_scam_type.length){
+      html+='<div class="card" style="margin-top:14px"><div class="card-title">Loss Distribution by Scam Type</div><div style="height:260px"><canvas id="impactChart"></canvas></div></div>';
+    }
+    el.innerHTML=html;
+
+    if(d.by_scam_type&&d.by_scam_type.length){
+      const colors=['#ef4444','#f97316','#f59e0b','#22c55e','#3b82f6','#a78bfa','#06d6a0'];
+      new Chart(document.getElementById('impactChart'),{type:'doughnut',
+        data:{labels:d.by_scam_type.map(t=>t.type),datasets:[{data:d.by_scam_type.map(t=>t.amount),
+          backgroundColor:colors.slice(0,d.by_scam_type.length),borderWidth:0}]},
+        options:{maintainAspectRatio:false,cutout:'65%',plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}}}});
+    }
+  }catch(e){el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>'}
+}
+
 // ── Init ──
-loadCmd();
+loadCmd();loadGHHistory();loadComplaints();
 </script>
 </body>
 </html>
