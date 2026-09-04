@@ -290,6 +290,13 @@ input[type=file]{background:var(--bg);border:1px solid var(--border);color:var(-
   <a class="nav-item" data-p="flow"><div class="nav-icon" style="background:rgba(167,139,250,.2);color:#a78bfa">FF</div>Financial Flow</a>
   <a class="nav-item" data-p="playbook"><div class="nav-icon" style="background:rgba(59,130,246,.2);color:#3b82f6">PB</div>Playbook</a>
   <a class="nav-item" data-p="impact"><div class="nav-icon" style="background:rgba(34,197,94,.2);color:#22c55e">VI</div>Victim Impact</a>
+  <div class="nav-section">Advanced</div>
+  <a class="nav-item" data-p="dossier"><div class="nav-icon" style="background:rgba(239,68,68,.2);color:#ef4444">SD</div>Suspect Dossier</a>
+  <a class="nav-item" data-p="qr"><div class="nav-icon" style="background:rgba(167,139,250,.2);color:#a78bfa">QR</div>QR Forensics</a>
+  <a class="nav-item" data-p="threatfeed"><div class="nav-icon" style="background:rgba(249,115,22,.2);color:#f97316">TF</div>Threat Feed</a>
+  <a class="nav-item" data-p="fraudproof"><div class="nav-icon" style="background:rgba(59,130,246,.2);color:#3b82f6">FP</div>Fraud Proof</a>
+  <a class="nav-item" data-p="pulse"><div class="nav-icon" style="background:rgba(6,214,160,.2);color:#06d6a0">CP</div>Cyber Pulse</a>
+  <a class="nav-item" data-p="news"><div class="nav-icon" style="background:rgba(245,158,11,.2);color:#f59e0b">CN</div>Cyber News</a>
   <div class="nav-section">Analysis</div>
   <a class="nav-item" data-p="analytics"><div class="nav-icon">AN</div>Analytics</a>
   <a class="nav-item" data-p="doctrine"><div class="nav-icon">DC</div>Doctrine</a>
@@ -853,6 +860,190 @@ input[type=file]{background:var(--bg);border:1px solid var(--border);color:var(-
     <button class="btn btn-primary" onclick="calcImpact()">Calculate Aggregate Impact</button>
   </div>
   <div id="impactResults"></div>
+</section>
+
+<!-- ── Suspect Dossier PDF ── -->
+<section class="panel" id="p-dossier">
+  <div class="panel-head">
+    <h1>Suspect Intelligence Dossier</h1>
+    <div class="sub">Generate a multi-page classified PDF dossier with full intelligence sweep</div>
+  </div>
+  <div class="grid2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--red)"></span>Dossier Parameters</div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px">Suspect Phone Number *</label>
+        <input id="dosPhone" class="input" placeholder="e.g. 9876543210" style="width:100%">
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px">Suspect Name</label>
+        <input id="dosName" class="input" placeholder="e.g. Rajesh Kumar" style="width:100%">
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px">Case ID (auto-generated if blank)</label>
+        <input id="dosCaseId" class="input" placeholder="e.g. SCINT-2026-001" style="width:100%">
+      </div>
+      <button class="btn btn-primary" onclick="generateDossier()" style="width:100%;margin-top:6px">Generate Classified Dossier PDF</button>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--accent)"></span>Dossier Contents</div>
+      <div style="font-size:12px;color:var(--dim);line-height:2">
+        <div style="color:var(--text);font-weight:600">The generated PDF includes:</div>
+        <div>Page 1 — Cover sheet with classification markings</div>
+        <div>Page 2 — Risk assessment + Identity (Aadhaar) intelligence</div>
+        <div>Page 3 — Financial (Banking/UPI) intelligence</div>
+        <div>Page 4 — Telecom/CDR + CCTNS criminal records</div>
+        <div>Page 5 — Recommended actions based on risk level</div>
+        <div style="margin-top:8px;color:var(--muted);font-size:11px">All data is synthetic/dummy for demonstration</div>
+      </div>
+    </div>
+  </div>
+  <div id="dosResults"></div>
+</section>
+
+<!-- ── QR Code Forensics ── -->
+<section class="panel" id="p-qr">
+  <div class="panel-head">
+    <h1>QR Code Forensics</h1>
+    <div class="sub">Decode and analyze QR codes for malicious URLs, UPI traps, and scam payloads</div>
+  </div>
+  <div class="grid2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--purple)"></span>Upload QR Code Image</div>
+      <div style="border:2px dashed var(--border);border-radius:10px;padding:30px;text-align:center;cursor:pointer;transition:border-color .2s" id="qrDrop" onclick="document.getElementById('qrFile').click()">
+        <div style="font-size:36px;margin-bottom:8px;opacity:.5">&#128270;</div>
+        <div style="color:var(--dim);font-size:13px">Drop QR image here or click to upload</div>
+        <div style="color:var(--muted);font-size:11px;margin-top:4px">PNG, JPG, or BMP supported</div>
+        <input type="file" id="qrFile" accept="image/*" style="display:none" onchange="decodeQR(this)">
+      </div>
+      <div style="text-align:center;margin:12px 0;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:2px">— OR PASTE CONTENT DIRECTLY —</div>
+      <textarea id="qrManual" class="input" rows="3" placeholder="Paste decoded QR content: URL, UPI link, text..." style="width:100%;resize:vertical"></textarea>
+      <button class="btn btn-primary" onclick="analyzeQRManual()" style="width:100%;margin-top:8px">Analyze Content</button>
+      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-outline" onclick="qrDemo('upi')">Demo: UPI QR</button>
+        <button class="btn btn-sm btn-outline" onclick="qrDemo('phish')">Demo: Phishing</button>
+        <button class="btn btn-sm btn-outline" onclick="qrDemo('short')">Demo: Short URL</button>
+      </div>
+    </div>
+    <div>
+      <canvas id="qrCanvas" style="display:none"></canvas>
+      <div id="qrResults"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Live Threat Feed ── -->
+<section class="panel" id="p-threatfeed">
+  <div class="panel-head">
+    <h1>Live Threat Intelligence Feed</h1>
+    <div class="sub">Real-time IOC feed from URLhaus (abuse.ch) and ThreatFox — live malicious URLs and indicators</div>
+  </div>
+  <div style="margin-bottom:14px;display:flex;gap:10px;align-items:center">
+    <button class="btn btn-primary" onclick="loadThreatFeed()">Fetch Live Threats</button>
+    <span id="tfStatus" style="font-size:11px;color:var(--muted);font-family:var(--mono)"></span>
+  </div>
+  <div id="tfResults"></div>
+</section>
+
+<!-- ── Fraud Proof Package ── -->
+<section class="panel" id="p-fraudproof">
+  <div class="panel-head">
+    <h1>Fraud Proof Package</h1>
+    <div class="sub">Generate a standardized evidence report for bank submission with legal references</div>
+  </div>
+  <div class="grid2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--blue)"></span>Victim Details</div>
+      <div style="display:grid;gap:8px">
+        <input id="fpVictim" class="input" placeholder="Victim Name *" style="width:100%">
+        <input id="fpVPhone" class="input" placeholder="Victim Phone" style="width:100%">
+        <input id="fpVBank" class="input" placeholder="Victim's Bank" style="width:100%">
+        <input id="fpVAccount" class="input" placeholder="Victim Account No." style="width:100%">
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--red)"></span>Incident Details</div>
+      <div style="display:grid;gap:8px">
+        <div style="display:flex;gap:8px">
+          <input id="fpDate" class="input" type="date" placeholder="Date of Fraud" style="flex:1">
+          <input id="fpAmount" class="input" type="number" placeholder="Amount Lost (₹)" style="flex:1">
+        </div>
+        <select id="fpMode" class="input" style="width:100%">
+          <option value="UPI">UPI Transfer</option><option value="NEFT/RTGS">NEFT/RTGS</option>
+          <option value="Card">Debit/Credit Card</option><option value="Net Banking">Net Banking</option>
+          <option value="Wallet">Digital Wallet</option><option value="Crypto">Cryptocurrency</option>
+        </select>
+        <select id="fpScamType" class="input" style="width:100%">
+          <option value="UPI Fraud">UPI Fraud</option><option value="Digital Arrest">Digital Arrest</option>
+          <option value="Investment Scam">Investment Scam</option><option value="Job Scam">Job Scam</option>
+          <option value="KYC Fraud">KYC Fraud</option><option value="Sextortion">Sextortion</option>
+          <option value="Phishing">Phishing</option><option value="Other">Other</option>
+        </select>
+        <input id="fpTxnIds" class="input" placeholder="Transaction ID(s), comma-separated" style="width:100%">
+      </div>
+    </div>
+  </div>
+  <div class="grid2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--amber)"></span>Suspect Details</div>
+      <div style="display:grid;gap:8px">
+        <input id="fpSPhone" class="input" placeholder="Suspect Phone" style="width:100%">
+        <input id="fpSUpi" class="input" placeholder="Suspect UPI ID" style="width:100%">
+        <input id="fpSAccount" class="input" placeholder="Suspect Account No." style="width:100%">
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--accent)"></span>Actions Already Taken</div>
+      <div style="display:grid;gap:8px">
+        <input id="fpNcrp" class="input" placeholder="NCRP Complaint Number (if filed)" style="width:100%">
+        <input id="fpFir" class="input" placeholder="FIR Number (if registered)" style="width:100%">
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim);cursor:pointer">
+          <input type="checkbox" id="fp1930" style="accent-color:var(--accent)"> Called 1930 Helpline
+        </label>
+      </div>
+    </div>
+  </div>
+  <div style="margin-bottom:14px">
+    <textarea id="fpDesc" class="input" rows="3" placeholder="Brief description of how the fraud occurred..." style="width:100%;resize:vertical"></textarea>
+  </div>
+  <button class="btn btn-primary" onclick="generateFraudProof()">Generate Fraud Proof Package</button>
+  <div id="fpResults" style="margin-top:14px"></div>
+</section>
+
+<!-- ── Cyber Pulse ── -->
+<section class="panel" id="p-pulse">
+  <div class="panel-head">
+    <h1>Cyber Pulse — India</h1>
+    <div class="sub">State-wise cybercrime trend dashboard with national intelligence overview</div>
+  </div>
+  <div style="margin-bottom:14px">
+    <button class="btn btn-primary" onclick="loadCyberPulse()">Load National Cyber Pulse</button>
+  </div>
+  <div id="pulseResults"></div>
+</section>
+
+<!-- ── Cyber News & Breach Feed ── -->
+<section class="panel" id="p-news">
+  <div class="panel-head">
+    <h1>Cyber News & Breach Feed</h1>
+    <div class="sub">Latest Indian cybersecurity news, data breach reports, and threat advisories</div>
+  </div>
+  <div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-primary" onclick="loadCyberNews()">Load Feed</button>
+    <select id="newsCategory" class="input" style="width:auto" onchange="loadCyberNews()">
+      <option value="">All Categories</option>
+      <option value="Advisory">Advisory</option><option value="Breach">Breach</option>
+      <option value="Report">Report</option><option value="Enforcement">Enforcement</option>
+      <option value="Threat Alert">Threat Alert</option><option value="Regulation">Regulation</option>
+      <option value="Scam">Scam</option><option value="Attack">Attack</option>
+      <option value="Technology">Technology</option>
+    </select>
+    <select id="newsSeverity" class="input" style="width:auto" onchange="loadCyberNews()">
+      <option value="">All Severity</option>
+      <option value="CRITICAL">Critical</option><option value="HIGH">High</option><option value="MEDIUM">Medium</option>
+    </select>
+  </div>
+  <div id="newsResults"></div>
 </section>
 
 </main>
@@ -2008,6 +2199,347 @@ async function calcImpact(){
           backgroundColor:colors.slice(0,d.by_scam_type.length),borderWidth:0}]},
         options:{maintainAspectRatio:false,cutout:'65%',plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}}}});
     }
+  }catch(e){el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>'}
+}
+
+// ── Suspect Dossier PDF ──
+async function generateDossier(){
+  const phone=document.getElementById('dosPhone').value.trim();
+  const el=document.getElementById('dosResults');
+  if(!phone){el.innerHTML='<div class="card card-alert"><div class="empty">Enter a suspect phone number</div></div>';return}
+  el.innerHTML='<div class="loading">Generating classified intelligence dossier...</div>';
+  try{
+    const resp=await fetch('/api/dossier',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({phone,suspect_name:document.getElementById('dosName').value.trim()||'Unknown',
+        case_id:document.getElementById('dosCaseId').value.trim()})});
+    if(!resp.ok){const d=await resp.json();el.innerHTML='<div class="empty">'+esc(d.error||'Error')+'</div>';return}
+    const blob=await resp.blob();
+    const url=URL.createObjectURL(blob);
+    el.innerHTML='<div class="card" style="text-align:center;padding:30px">'+
+      '<div style="font-size:48px;margin-bottom:12px">&#128196;</div>'+
+      '<h2 style="color:var(--accent);margin-bottom:8px">Dossier Generated Successfully</h2>'+
+      '<div style="color:var(--dim);font-size:13px;margin-bottom:16px">Multi-page classified PDF ready for download</div>'+
+      '<a href="'+url+'" download="SCINT_Dossier_'+esc(phone)+'.pdf" class="btn btn-primary" style="display:inline-block;text-decoration:none">Download Dossier PDF</a></div>';
+  }catch(e){el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>'}
+}
+
+// ── QR Code Forensics ──
+const QR_DEMOS={
+  upi:'upi://pay?pa=scammer9876@ybl&pn=Rajesh%20Kumar&am=15000&cu=INR&tn=Payment%20for%20customs%20clearance',
+  phish:'https://sbi-netbanking-update.xyz/login?verify=true&uid=victim123&redirect=http://185.234.52.11/steal',
+  short:'Click to claim prize: https://bit.ly/3xFakeLink — You won ₹50,00,000! Call 8899776655 to collect. Send ₹999 processing fee to lucky@ybl'
+};
+function qrDemo(type){document.getElementById('qrManual').value=QR_DEMOS[type];analyzeQRManual()}
+
+function decodeQR(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      const canvas=document.getElementById('qrCanvas');
+      const ctx=canvas.getContext('2d');
+      canvas.width=img.width;canvas.height=img.height;
+      ctx.drawImage(img,0,0);
+      const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+      // Simple extraction — look for text patterns in the image
+      // Since we can't use jsQR without CDN, prompt user to paste content
+      document.getElementById('qrResults').innerHTML=
+        '<div class="card"><div class="card-title"><span class="dot" style="background:var(--amber)"></span>Image Loaded</div>'+
+        '<div style="text-align:center;padding:10px"><img src="'+ev.target.result+'" style="max-width:200px;max-height:200px;border-radius:8px;border:1px solid var(--border);margin-bottom:12px"><br>'+
+        '<div style="color:var(--dim);font-size:12px;margin-bottom:8px">QR image loaded. Paste the decoded content below for analysis, or use a QR scanner app to decode first.</div></div></div>';
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzeQRManual(){
+  const content=document.getElementById('qrManual').value.trim();
+  const el=document.getElementById('qrResults');
+  if(!content){el.innerHTML='';return}
+  el.innerHTML='<div class="loading">Analyzing QR payload for threats...</div>';
+  try{
+    const d=await(await fetch('/api/qr-analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content})})).json();
+    if(d.error){el.innerHTML='<div class="empty">'+esc(d.error)+'</div>';return}
+    const sevColor=d.severity==='HIGH'?'var(--red)':d.severity==='MEDIUM'?'var(--amber)':'var(--green)';
+    let html='<div class="scorecard" style="border-color:'+sevColor+'">'+gaugeHTML(d.risk_score,d.severity)+
+      '<div class="sc-info"><h2 style="color:'+sevColor+'">'+esc(d.verdict)+'</h2>'+
+      '<div class="q" style="margin-top:4px">Type: <b style="color:var(--blue)">'+esc(d.type)+'</b></div></div></div>';
+
+    if(d.findings&&d.findings.length){
+      html+='<div class="card" style="margin-bottom:14px"><div class="card-title"><span class="dot" style="background:var(--red)"></span>Forensic Findings ('+d.findings.length+')</div>';
+      d.findings.forEach((f,i)=>{
+        const isWarning=f.includes('HIGH')||f.includes('SUSPICIOUS')||f.includes('SHORTENED')||f.includes('IP-BASED')||f.includes('BITCOIN');
+        html+='<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px;color:'+(isWarning?'var(--red)':'var(--dim)')+'">'+
+          '<span style="color:var(--accent);font-weight:700;font-family:var(--mono);flex-shrink:0">'+(i+1)+'.</span>'+esc(f)+'</div>';
+      });
+      html+='</div>';
+    }
+
+    const iocs=d.iocs||{};
+    const hasIOCs=Object.values(iocs).some(v=>Array.isArray(v)&&v.length);
+    if(hasIOCs){
+      html+='<div class="card" style="margin-bottom:14px"><div class="card-title"><span class="dot" style="background:var(--amber)"></span>Extracted IOCs</div>';
+      if(iocs.urls&&iocs.urls.length)iocs.urls.forEach(u=>{html+=row('URL',u,true)});
+      if(iocs.upis&&iocs.upis.length)html+=row('UPI IDs',iocs.upis.join(', '),true);
+      if(iocs.phones&&iocs.phones.length){
+        html+=row('Phones',iocs.phones.join(', '),true);
+        html+='<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">';
+        iocs.phones.forEach(p=>{html+='<button class="btn btn-sm btn-outline" onclick="scanFromDA(\''+esc(p)+'\')">Scan '+esc(p)+'</button>'});
+        html+='</div>';
+      }
+      if(iocs.emails&&iocs.emails.length)html+=row('Emails',iocs.emails.join(', '),true);
+      if(iocs.crypto&&iocs.crypto.length)html+=row('Crypto Addresses',iocs.crypto.join(', '),true);
+      html+='</div>';
+    }
+
+    if(d.upi_params){
+      html+='<div class="card"><div class="card-title"><span class="dot" style="background:var(--blue)"></span>UPI Payment Details</div>';
+      const p=d.upi_params;
+      if(p.pa)html+=row('VPA (Payee Address)',p.pa,true);
+      if(p.pn)html+=row('Payee Name',decodeURIComponent(p.pn.replace(/%20/g,' ')));
+      if(p.am)html+=row('Amount','₹'+p.am,parseFloat(p.am)>5000);
+      if(p.cu)html+=row('Currency',p.cu);
+      if(p.tn)html+=row('Note',decodeURIComponent(p.tn.replace(/%20/g,' ')));
+      html+='</div>';
+    }
+
+    html+='<div class="card" style="margin-top:14px"><div class="card-title"><span class="dot" style="background:var(--muted)"></span>Raw Content</div>'+
+      '<div style="font-family:var(--mono);font-size:11px;color:var(--dim);word-break:break-all;padding:8px 0;max-height:100px;overflow-y:auto">'+esc(d.raw)+'</div></div>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>'}
+}
+
+// ── Live Threat Feed ──
+async function loadThreatFeed(){
+  const el=document.getElementById('tfResults');
+  const st=document.getElementById('tfStatus');
+  el.innerHTML='<div class="loading">Fetching live threat intelligence from URLhaus + ThreatFox...</div>';
+  st.textContent='Connecting to abuse.ch...';
+  try{
+    const d=await(await fetch('/api/threat-feed')).json();
+    st.textContent='Last updated: '+d.timestamp;
+    let html='<div class="metrics" style="margin-bottom:14px">'+
+      '<div class="metric m-red"><div class="val">'+d.total+'</div><div class="lbl">Total IOCs</div></div>'+
+      '<div class="metric m-amber"><div class="val">'+d.urlhaus.length+'</div><div class="lbl">Malicious URLs</div></div>'+
+      '<div class="metric m-purple"><div class="val">'+d.threatfox.length+'</div><div class="lbl">ThreatFox IOCs</div></div></div>';
+
+    if(d.errors&&d.errors.length){
+      html+='<div class="card card-alert" style="margin-bottom:14px"><div class="card-title"><span class="dot" style="background:var(--amber)"></span>Feed Warnings</div>';
+      d.errors.forEach(e=>{html+='<div style="font-size:12px;color:var(--amber);padding:4px 0">'+esc(e)+'</div>'});
+      html+='</div>';
+    }
+
+    if(d.urlhaus.length){
+      html+='<div class="card" style="margin-bottom:14px"><div class="card-title"><span class="dot" style="background:var(--red)"></span>URLhaus — Malicious URLs (Live)</div>'+
+        '<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>URL</th><th>Threat</th><th>Status</th><th>Host</th><th>Added</th></tr></thead><tbody>';
+      d.urlhaus.forEach(u=>{
+        const sc=u.status==='online'?'color:var(--red);font-weight:700':'color:var(--green)';
+        html+='<tr><td style="font-family:var(--mono);font-size:10px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(u.url)+'">'+esc(u.url.substring(0,60))+(u.url.length>60?'...':'')+'</td>'+
+          '<td style="font-size:11px;font-weight:600">'+esc(u.threat||'unknown')+'</td>'+
+          '<td style="'+sc+';font-size:11px;font-family:var(--mono)">'+esc(u.status)+'</td>'+
+          '<td style="font-family:var(--mono);font-size:11px">'+esc(u.host)+'</td>'+
+          '<td style="font-size:10px;color:var(--muted)">'+esc((u.added||'').slice(0,16))+'</td></tr>';
+      });
+      html+='</tbody></table></div></div>';
+    }
+
+    if(d.threatfox.length){
+      html+='<div class="card"><div class="card-title"><span class="dot" style="background:var(--purple)"></span>ThreatFox — Malware IOCs (Live)</div>'+
+        '<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>IOC</th><th>Type</th><th>Malware</th><th>Confidence</th><th>First Seen</th></tr></thead><tbody>';
+      d.threatfox.forEach(t=>{
+        const cc=t.confidence>=75?'var(--red)':t.confidence>=50?'var(--amber)':'var(--green)';
+        html+='<tr><td style="font-family:var(--mono);font-size:10px;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(t.ioc)+'">'+esc(t.ioc.substring(0,50))+'</td>'+
+          '<td style="font-size:11px">'+esc(t.ioc_type)+'</td>'+
+          '<td style="font-size:11px;font-weight:600;color:var(--red)">'+esc(t.malware)+'</td>'+
+          '<td style="font-family:var(--mono);font-weight:700;color:'+cc+'">'+t.confidence+'%</td>'+
+          '<td style="font-size:10px;color:var(--muted)">'+esc((t.first_seen||'').slice(0,16))+'</td></tr>';
+      });
+      html+='</tbody></table></div></div>';
+    }
+
+    if(!d.urlhaus.length&&!d.threatfox.length){
+      html+='<div class="card"><div class="empty">No threat data available. Check network connectivity to abuse.ch APIs.</div></div>';
+    }
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>';st.textContent='Failed'}
+}
+
+// ── Fraud Proof Package ──
+async function generateFraudProof(){
+  const victim=document.getElementById('fpVictim').value.trim();
+  const el=document.getElementById('fpResults');
+  if(!victim){el.innerHTML='<div class="card card-alert"><div class="empty">Enter victim name</div></div>';return}
+  el.innerHTML='<div class="loading">Generating fraud proof package...</div>';
+  try{
+    const body={
+      victim_name:victim,victim_phone:document.getElementById('fpVPhone').value.trim(),
+      victim_bank:document.getElementById('fpVBank').value.trim(),
+      victim_account:document.getElementById('fpVAccount').value.trim(),
+      fraud_date:document.getElementById('fpDate').value,
+      amount:document.getElementById('fpAmount').value||0,
+      fraud_mode:document.getElementById('fpMode').value,
+      scam_type:document.getElementById('fpScamType').value,
+      transaction_ids:document.getElementById('fpTxnIds').value.trim(),
+      suspect_phone:document.getElementById('fpSPhone').value.trim(),
+      suspect_upi:document.getElementById('fpSUpi').value.trim(),
+      suspect_account:document.getElementById('fpSAccount').value.trim(),
+      ncrp_number:document.getElementById('fpNcrp').value.trim(),
+      fir_number:document.getElementById('fpFir').value.trim(),
+      called_1930:document.getElementById('fp1930').checked,
+      description:document.getElementById('fpDesc').value.trim()
+    };
+    const d=await(await fetch('/api/fraud-proof',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json();
+    if(d.error){el.innerHTML='<div class="empty">'+esc(d.error)+'</div>';return}
+
+    let html='<div class="card" style="margin-bottom:14px;border-color:var(--blue)">'+
+      '<div class="card-title"><span class="dot" style="background:var(--blue)"></span>FRAUD PROOF PACKAGE — '+esc(d.reference_number)+'</div>'+
+      '<div style="display:flex;gap:12px;font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:12px">'+
+      '<span>Generated: '+esc(d.generated_at)+'</span><span>Type: '+esc(d.document_type)+'</span></div>';
+
+    // Victim details
+    html+='<div style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Victim Details</div>';
+    const vd=d.victim_details;
+    html+=row('Name',vd.name)+row('Phone',vd.phone)+row('Bank',vd.bank)+row('Account',vd.account_number);
+    html+='</div>';
+
+    // Incident details
+    html+='<div style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Incident Details</div>';
+    const id=d.incident_details;
+    html+=row('Date of Fraud',id.date_of_fraud)+row('Amount Lost','₹'+Number(id.amount_lost).toLocaleString('en-IN'),true)+
+      row('Mode',id.mode_of_fraud)+row('Scam Type',id.scam_type);
+    if(id.transaction_ids.length)html+=row('Transaction IDs',id.transaction_ids.join(', '),true);
+    if(id.description)html+=row('Description',id.description);
+    html+='</div>';
+
+    // Suspect details
+    html+='<div style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;color:var(--amber);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Suspect Details</div>';
+    const sd=d.suspect_details;
+    html+=row('Phone',sd.phone,sd.phone!=='N/A')+row('UPI ID',sd.upi_id,sd.upi_id!=='N/A')+row('Account',sd.bank_account);
+    html+='</div>';
+
+    // SCINT Intelligence
+    if(d.scint_intelligence){
+      const si=d.scint_intelligence;
+      const bc=si.risk_band==='HIGH'?'var(--red)':si.risk_band==='MEDIUM'?'var(--amber)':'var(--green)';
+      html+='<div style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;color:var(--purple);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">SCINT Intelligence on Suspect</div>';
+      html+=row('Risk Score',si.suspect_risk_score+'/100 — '+si.risk_band,si.suspect_risk_score>=40);
+      if(si.risk_factors.length)html+=row('Risk Factors',si.risk_factors.join(', '),true);
+      html+='</div>';
+    }
+
+    // Evidence
+    html+='<div style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;color:var(--blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Evidence Summary</div>';
+    d.evidence_summary.forEach(e=>{html+='<div style="font-size:12px;color:var(--dim);padding:3px 0">&#8226; '+esc(e)+'</div>'});
+    html+='</div>';
+
+    // Actions taken
+    if(d.actions_taken.length){
+      html+='<div style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;color:var(--green);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Actions Already Taken</div>';
+      d.actions_taken.forEach(a=>{html+='<div style="font-size:12px;color:var(--dim);padding:3px 0">&#10003; '+esc(a)+'</div>'});
+      html+='</div>';
+    }
+
+    // Bank requests
+    html+='<div style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Requested Actions from Bank</div>';
+    d.bank_request.forEach((r,i)=>{html+='<div style="font-size:12px;color:var(--text);padding:4px 0;font-weight:500"><span style="color:var(--accent);font-family:var(--mono)">'+(i+1)+'.</span> '+esc(r)+'</div>'});
+    html+='</div>';
+
+    // Legal references
+    html+='<div><div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Legal References</div>';
+    d.legal_references.forEach(l=>{html+='<div style="font-size:11px;color:var(--muted);padding:2px 0;font-family:var(--mono)">&#167; '+esc(l)+'</div>'});
+    html+='</div></div>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>'}
+}
+
+// ── Cyber Pulse ──
+async function loadCyberPulse(){
+  const el=document.getElementById('pulseResults');
+  el.innerHTML='<div class="loading">Loading national cybercrime pulse data...</div>';
+  try{
+    const d=await(await fetch('/api/cyber-pulse')).json();
+    let html='<div class="metrics" style="margin-bottom:14px">'+
+      '<div class="metric m-red"><div class="val">'+(d.national_total/1000).toFixed(0)+'K</div><div class="lbl">National Cases</div></div>'+
+      '<div class="metric m-amber"><div class="val">'+esc(d.most_affected)+'</div><div class="lbl">Most Affected</div></div>'+
+      '<div class="metric m-purple"><div class="val">'+esc(d.highest_growth)+'</div><div class="lbl">Highest Growth</div></div>'+
+      '<div class="metric m-blue"><div class="val">'+d.states.length+'</div><div class="lbl">States Tracked</div></div></div>';
+
+    // Top crimes chart
+    if(d.top_crimes_national&&d.top_crimes_national.length){
+      html+='<div class="card" style="margin-bottom:14px"><div class="card-title"><span class="dot" style="background:var(--red)"></span>Top Cybercrime Types — National</div>'+
+        '<div style="height:220px"><canvas id="pulseChart"></canvas></div></div>';
+    }
+
+    // State table
+    html+='<div class="card" style="margin-bottom:14px"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>State-wise Cybercrime Dashboard</div>'+
+      '<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>State</th><th>Total Cases</th><th>Top Crime</th><th>YoY Growth</th><th>Hotspot</th><th>SCINT Cases</th></tr></thead><tbody>';
+    d.states.forEach(s=>{
+      const gc=s.yoy_change>=40?'var(--red)':s.yoy_change>=25?'var(--amber)':'var(--green)';
+      html+='<tr><td style="font-weight:600">'+esc(s.state)+'</td>'+
+        '<td style="font-family:var(--mono);font-weight:700">'+s.total_cases.toLocaleString('en-IN')+'</td>'+
+        '<td style="font-size:11px">'+esc(s.top_crime)+'</td>'+
+        '<td style="font-family:var(--mono);font-weight:700;color:'+gc+'">+'+s.yoy_change+'%</td>'+
+        '<td style="font-size:11px;color:var(--dim)">'+esc(s.hotspot_city)+'</td>'+
+        '<td style="font-family:var(--mono);color:var(--accent)">'+(s.scint_complaints||'—')+'</td></tr>';
+    });
+    html+='</tbody></table></div></div>';
+    el.innerHTML=html;
+
+    // Render chart
+    if(d.top_crimes_national&&d.top_crimes_national.length){
+      const colors=['#ef4444','#f97316','#f59e0b','#22c55e','#3b82f6','#a78bfa','#06d6a0','#ec4899','#14b8a6'];
+      new Chart(document.getElementById('pulseChart'),{type:'bar',
+        data:{labels:d.top_crimes_national.map(c=>c.type),
+          datasets:[{label:'Cases',data:d.top_crimes_national.map(c=>c.cases),
+            backgroundColor:colors.slice(0,d.top_crimes_national.length),borderWidth:0,borderRadius:4}]},
+        options:{maintainAspectRatio:false,indexAxis:'y',
+          scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8',font:{size:10}}},
+            y:{grid:{display:false},ticks:{color:'#e2e8f0',font:{size:11}}}},
+          plugins:{legend:{display:false}}}});
+    }
+  }catch(e){el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>'}
+}
+
+// ── Cyber News & Breach Feed ──
+async function loadCyberNews(){
+  const el=document.getElementById('newsResults');
+  const cat=document.getElementById('newsCategory').value;
+  const sev=document.getElementById('newsSeverity').value;
+  el.innerHTML='<div class="loading">Loading cyber intelligence feed...</div>';
+  try{
+    let url='/api/cyber-news?limit=20';
+    if(cat)url+='&category='+encodeURIComponent(cat);
+    if(sev)url+='&severity='+encodeURIComponent(sev);
+    const d=await(await fetch(url)).json();
+
+    let html='<div class="metrics" style="margin-bottom:14px">'+
+      '<div class="metric m-red"><div class="val">'+d.total+'</div><div class="lbl">Articles</div></div>'+
+      '<div class="metric m-blue"><div class="val">'+d.categories.length+'</div><div class="lbl">Categories</div></div>'+
+      '<div class="metric m-amber"><div class="val">'+d.sources.length+'</div><div class="lbl">Sources</div></div></div>';
+
+    if(d.articles&&d.articles.length){
+      d.articles.forEach(a=>{
+        const sevColor=a.severity==='CRITICAL'?'var(--red)':a.severity==='HIGH'?'#f97316':'var(--amber)';
+        const catColor=a.category==='Breach'?'var(--red)':a.category==='Advisory'?'var(--amber)':
+          a.category==='Enforcement'?'var(--green)':a.category==='Attack'?'var(--red)':'var(--blue)';
+        html+='<div class="card" style="margin-bottom:10px;border-left:3px solid '+sevColor+'">'+
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">'+
+          '<div style="flex:1">'+
+          '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">'+
+          '<span class="priority-badge" style="background:'+sevColor+'22;color:'+sevColor+'">'+esc(a.severity)+'</span>'+
+          '<span style="font-size:10px;font-weight:700;color:'+catColor+';letter-spacing:1px;text-transform:uppercase">'+esc(a.category)+'</span></div>'+
+          '<div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:6px">'+esc(a.title)+'</div>'+
+          '<div style="font-size:12px;color:var(--dim);line-height:1.6">'+esc(a.summary)+'</div>'+
+          '<div style="display:flex;gap:16px;margin-top:8px;font-size:10px;color:var(--muted);font-family:var(--mono)">'+
+          '<span>Source: <b style="color:var(--text)">'+esc(a.source)+'</b></span>'+
+          '<span>Date: '+esc(a.date)+'</span></div></div></div></div>';
+      });
+    }else{
+      html+='<div class="card"><div class="empty">No articles match the selected filters</div></div>';
+    }
+    el.innerHTML=html;
   }catch(e){el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>'}
 }
 
