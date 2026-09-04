@@ -258,9 +258,10 @@ input[type=file]{background:var(--bg);border:1px solid var(--border);color:var(-
 @media(max-width:768px){
   body{grid-template-columns:1fr;
     grid-template-areas:"banner" "topbar" "main" "foot"}
-  .sidebar{position:fixed;top:0;left:-260px;width:260px;height:100%;z-index:50;
-    transition:left .25s ease;padding-top:16px;grid-area:unset;overflow-y:auto}
-  .sidebar.open{left:0}
+  .sidebar{position:fixed;top:0;left:0;width:260px;height:100%;z-index:50;
+    padding-top:16px;overflow-y:auto;transform:translateX(-100%);
+    transition:transform .25s ease}
+  .sidebar.open{transform:translateX(0)}
   .sidebar-overlay.open{display:block}
   .hamburger{display:block}
   .tb-sub{display:none}
