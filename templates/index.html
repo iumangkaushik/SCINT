@@ -259,7 +259,7 @@ input[type=file]{background:var(--bg);border:1px solid var(--border);color:var(-
   body{grid-template-columns:1fr;
     grid-template-areas:"banner" "topbar" "main" "foot"}
   .sidebar{position:fixed;top:0;left:-260px;width:260px;height:100%;z-index:50;
-    transition:left .25s ease;padding-top:16px}
+    transition:left .25s ease;padding-top:16px;grid-area:unset;overflow-y:auto}
   .sidebar.open{left:0}
   .sidebar-overlay.open{display:block}
   .hamburger{display:block}
@@ -293,6 +293,7 @@ input[type=file]{background:var(--bg);border:1px solid var(--border);color:var(-
   .input{font-size:13px !important}
   #flowGraph{height:250px !important}
   #netGraph{height:250px !important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr !important}
 }
 </style>
 </head>
