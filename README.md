@@ -139,6 +139,10 @@ Python 3 · `requests` · `python-dotenv` · ip-api.com · AbuseIPDB · VirusTot
 
 SCINT was built to demonstrate technical capability **and** an understanding of the legal boundaries around sensitive data. Restricted government feeds (Aadhaar, CCTNS, CDR, banking) are simulated rather than accessed; only genuinely public, legal intelligence sources are queried live. Do not point this tool at real personal records, and do not use the risk scores to make real accusations — they are illustrative outputs over fake data.
 
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
 ---
 
 *Built for GPCSSI 2026, Gurugram Police Cyber Security Internship. Dummy data only.*
