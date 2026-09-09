@@ -1618,68 +1618,102 @@ def api_cyber_pulse():
     })
 
 
-# ── Cyber News & Breach Feed ───────────────────────────────────────────────
+# ── Cyber News — Live RSS Feeds ───────────────────────────────────────────
 
-CYBER_NEWS_FEED = [
-    {"title": "CERT-In Issues Advisory on Critical Vulnerability in Indian Banking Apps",
-     "source": "CERT-In", "category": "Advisory", "severity": "CRITICAL",
-     "date": "2026-09-03", "summary": "CERT-In has identified a critical authentication bypass vulnerability affecting multiple Indian banking applications. Banks have been directed to patch within 48 hours."},
-    {"title": "Digital Arrest Scam Losses Cross ₹2,140 Crore in 2026",
-     "source": "I4C", "category": "Report", "severity": "HIGH",
-     "date": "2026-09-02", "summary": "Indian Cyber Crime Coordination Centre reports digital arrest scams have defrauded victims of over ₹2,140 crore in 2026 alone, with Telangana and Haryana being worst affected."},
-    {"title": "Major Data Breach at Indian Telecom Provider Exposes 50M Records",
-     "source": "BleepingComputer", "category": "Breach", "severity": "CRITICAL",
-     "date": "2026-09-01", "summary": "A significant data breach at a major Indian telecom provider has exposed personal data of approximately 50 million subscribers including Aadhaar numbers and call records."},
-    {"title": "RBI Mandates Real-Time Fraud Monitoring for All UPI Transactions",
-     "source": "RBI", "category": "Regulation", "severity": "MEDIUM",
-     "date": "2026-08-30", "summary": "Reserve Bank of India has issued new guidelines requiring all banks to implement real-time AI-based fraud detection for UPI transactions exceeding ₹10,000."},
-    {"title": "Gurugram Cyber Cell Busts ₹85 Crore Investment Scam Ring",
-     "source": "Gurugram Police", "category": "Enforcement", "severity": "HIGH",
-     "date": "2026-08-29", "summary": "Gurugram Cyber Crime PS has arrested 12 suspects operating a fake stock trading platform that defrauded over 3,000 victims across 15 states."},
-    {"title": "New Phishing Kit Targets Indian Government Officials via Fake NIC Portal",
-     "source": "CERT-In", "category": "Threat Alert", "severity": "HIGH",
-     "date": "2026-08-28", "summary": "A sophisticated phishing campaign using a cloned NIC email portal is targeting central and state government officials to steal credentials and sensitive documents."},
-    {"title": "Indian Healthcare Database with 12M Patient Records Found on Dark Web",
-     "source": "CloudSEK", "category": "Breach", "severity": "CRITICAL",
-     "date": "2026-08-27", "summary": "Threat intelligence firm CloudSEK has discovered a database containing 12 million Indian patient records including diagnoses and Aadhaar numbers being sold on dark web forums."},
-    {"title": "Cryptocurrency Scam via Fake WhatsApp Trading Groups Claims 5,000+ Victims",
-     "source": "Economic Times", "category": "Scam", "severity": "HIGH",
-     "date": "2026-08-26", "summary": "A nationwide cryptocurrency investment scam operating through coordinated WhatsApp groups has been uncovered, with losses estimated at ₹340 crore."},
-    {"title": "NPCI Introduces AI-Based Mule Account Detection for UPI Ecosystem",
-     "source": "NPCI", "category": "Technology", "severity": "MEDIUM",
-     "date": "2026-08-25", "summary": "NPCI has deployed an AI/ML-based system to detect and flag mule accounts in real-time across the UPI payment ecosystem."},
-    {"title": "Massive DDoS Attack Targets Indian Government Websites During Independence Day",
-     "source": "CERT-In", "category": "Attack", "severity": "HIGH",
-     "date": "2026-08-15", "summary": "Multiple Indian government websites faced coordinated DDoS attacks on Independence Day, attributed to hacktivist groups. CERT-In activated emergency response."},
-    {"title": "SIM Swap Fraud Ring Operating from Jharkhand Dismantled",
-     "source": "CBI", "category": "Enforcement", "severity": "MEDIUM",
-     "date": "2026-08-14", "summary": "CBI has dismantled a SIM swap fraud ring operating from Deoghar, Jharkhand that had defrauded bank customers of over ₹25 crore using cloned SIM cards."},
-    {"title": "Indian BFSI Sector Faces 300% Spike in Ransomware Attacks",
-     "source": "DSCI", "category": "Report", "severity": "CRITICAL",
-     "date": "2026-08-12", "summary": "Data Security Council of India reports a 300% increase in ransomware attacks targeting Indian banking, financial services, and insurance sector compared to 2025."},
+import time, re as _re, html as _html
+
+try:
+    import feedparser
+    FEED_AVAILABLE = True
+except ImportError:
+    FEED_AVAILABLE = False
+
+RSS_FEEDS = [
+    {"url": "https://feeds.feedburner.com/TheHackersNews", "source": "The Hacker News", "category": "Threat Intel"},
+    {"url": "https://www.bleepingcomputer.com/feed/", "source": "BleepingComputer", "category": "Breach"},
+    {"url": "https://krebsonsecurity.com/feed/", "source": "KrebsOnSecurity", "category": "Investigation"},
+    {"url": "https://news.google.com/rss/search?q=cyber+crime+india+when:7d&hl=en-IN&gl=IN&ceid=IN:en", "source": "Google News", "category": "India Cyber Crime"},
+    {"url": "https://news.google.com/rss/search?q=cyber+scam+india+when:7d&hl=en-IN&gl=IN&ceid=IN:en", "source": "Google News", "category": "India Scam"},
 ]
+
+_news_cache = {"articles": [], "fetched_at": 0}
+CACHE_TTL = 3600
+
+
+def _strip_html(text):
+    clean = _re.sub(r'<[^>]+>', '', text or '')
+    return _html.unescape(clean).strip()
+
+
+def _fetch_live_news():
+    now = time.time()
+    if _news_cache["articles"] and now - _news_cache["fetched_at"] < CACHE_TTL:
+        return _news_cache["articles"]
+
+    if not FEED_AVAILABLE:
+        return []
+
+    articles = []
+    for feed_info in RSS_FEEDS:
+        try:
+            feed = feedparser.parse(feed_info["url"])
+            for entry in (feed.entries or [])[:10]:
+                summary = _strip_html(entry.get("summary") or entry.get("description") or "")
+                if len(summary) > 300:
+                    summary = summary[:297] + "..."
+                pub = entry.get("published_parsed") or entry.get("updated_parsed")
+                date_str = time.strftime("%Y-%m-%d", pub) if pub else ""
+                articles.append({
+                    "title": _strip_html(entry.get("title", "")),
+                    "source": feed_info["source"],
+                    "category": feed_info["category"],
+                    "date": date_str,
+                    "summary": summary,
+                    "link": entry.get("link", ""),
+                    "live": True,
+                })
+        except Exception:
+            continue
+
+    articles.sort(key=lambda a: a.get("date", ""), reverse=True)
+
+    seen = set()
+    unique = []
+    for a in articles:
+        key = a["title"][:60].lower()
+        if key not in seen:
+            seen.add(key)
+            unique.append(a)
+
+    _news_cache["articles"] = unique
+    _news_cache["fetched_at"] = now
+    return unique
+
 
 @app.route("/api/cyber-news")
 def api_cyber_news():
     category = request.args.get("category", "").strip()
-    severity = request.args.get("severity", "").strip()
-    limit = request.args.get("limit", 20, type=int)
+    source = request.args.get("source", "").strip()
+    limit = request.args.get("limit", 30, type=int)
 
-    news = CYBER_NEWS_FEED[:]
+    news = _fetch_live_news()
+
     if category:
-        news = [n for n in news if n["category"].lower() == category.lower()]
-    if severity:
-        news = [n for n in news if n["severity"] == severity.upper()]
+        news = [n for n in news if category.lower() in n["category"].lower()]
+    if source:
+        news = [n for n in news if source.lower() in n["source"].lower()]
 
-    categories = list(set(n["category"] for n in CYBER_NEWS_FEED))
-    sources = list(set(n["source"] for n in CYBER_NEWS_FEED))
+    categories = sorted(set(n["category"] for n in _fetch_live_news()))
+    sources = sorted(set(n["source"] for n in _fetch_live_news()))
 
     return jsonify({
         "articles": news[:limit],
         "total": len(news),
-        "categories": sorted(categories),
-        "sources": sorted(sources),
+        "categories": categories,
+        "sources": sources,
+        "live": FEED_AVAILABLE,
         "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "cache_ttl": CACHE_TTL,
     })
 
 
