@@ -15,6 +15,7 @@ Aadhaar / banking / telecom / CCTNS data is DUMMY. Only IP / email / domain /
 phone-metadata lookups are live.
 """
 
+import os
 import socket
 import csv
 import io
@@ -1725,4 +1726,6 @@ if __name__ == "__main__":
     print("  Live intel: %s | PDF: %s\n" % (
         "ENABLED" if LIVE_AVAILABLE else "disabled",
         "ENABLED" if PDF_AVAILABLE else "disabled"))
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    # The Werkzeug debugger allows arbitrary code execution from the browser,
+    # so it is opt-in (SCINT_DEBUG=1) and never on by default.
+    app.run(host="127.0.0.1", port=5000, debug=os.getenv("SCINT_DEBUG") == "1")

@@ -7,8 +7,10 @@ Built for educational/demonstration purposes using dummy data only.
 
 import csv
 import argparse
+import ipaddress
 import json
 import os
+import re
 from datetime import datetime
 
 # Live intelligence module (real APIs) — fails loud so we never hide errors
@@ -20,12 +22,10 @@ except Exception as _e:
     LIVE_AVAILABLE = False
     LIVE_IMPORT_ERROR = str(_e)
 
-# Live intelligence module (real APIs)
-try:
-    import live_intel
-    LIVE_AVAILABLE = True
-except Exception:
-    LIVE_AVAILABLE = False
+# If more than this many numbers sit behind one IP, it is almost certainly a
+# carrier NAT gateway or public Wi-Fi, not a fraud ring. Indian mobile carriers
+# put thousands of subscribers behind a single public IP (CGNAT).
+SHARED_GATEWAY_THRESHOLD = 10
 
 # ─── ANSI Colors ────────────────────────────────────────────────────────────
 RED     = "\033[91m"
@@ -211,7 +211,9 @@ def lookup_phone(phone, make_html=False):
         "cctns_cases": cctns_matches,
         "disclaimer": "DUMMY DATA — FOR DEMONSTRATION PURPOSES ONLY"
     }
-    report_path = os.path.join(BASE_DIR, "reports", f"scint_{phone}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    # Keep only digits/+ so user input can't steer the path (e.g. "../../x")
+    safe_phone = re.sub(r"[^0-9+]", "", phone) or "unknown"
+    report_path = os.path.join(BASE_DIR, "reports", f"scint_{safe_phone}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
     with open(report_path, 'w') as f_:
         json.dump(report, f_, indent=2)
 
@@ -293,6 +295,8 @@ def lookup_ip(ip, make_html=False):
             print(f"\n  {YELLOW}Live Risk Factors:{RESET}")
             for lf in live_factors:
                 print(f"    {RED}-> {lf}{RESET}")
+        for note in live_results.get("notes", []):
+            print(f"  {DIM}[i] {note}{RESET}")
         print(f"\n  {BOLD}Live Risk Score      : {risk_color(live_score)}{RESET}")
 
     print(f"\n{DIM}{'─'*62}{RESET}\n")
@@ -351,6 +355,16 @@ def lookup_domain(domain, make_html=False):
 
 # ─── Bulk Scanning ────────────────────────────────────────────────────────────
 
+def is_shared_gateway(ip, phones_on_ip):
+    """True if an IP is too widely shared to link its users to each other."""
+    try:
+        if ipaddress.ip_address(ip) in ipaddress.ip_network("100.64.0.0/10"):
+            return True   # RFC 6598 carrier-grade NAT range
+    except ValueError:
+        pass
+    return phones_on_ip > SHARED_GATEWAY_THRESHOLD
+
+
 def score_phone_quiet(phone):
     """Compute a phone risk score with NO printing. Returns (score, factors, summary)."""
     factors = []
@@ -380,11 +394,15 @@ def score_phone_quiet(phone):
     # Network proximity — shared IP with flagged numbers
     if t and t.get('linked_ips'):
         linked_ip = t['linked_ips']
-        shared_flagged = [r for r in load_csv("telecom_db.csv")
-                          if r.get('linked_ips') == linked_ip
-                          and r['phone'] != phone
-                          and r.get('flagged') == 'True']
-        if shared_flagged:
+        same_ip = [r for r in load_csv("telecom_db.csv")
+                   if r.get('linked_ips') == linked_ip and r['phone'] != phone]
+        shared_flagged = [r for r in same_ip if r.get('flagged') == 'True']
+        if shared_flagged and is_shared_gateway(linked_ip, len(same_ip) + 1):
+            # Sharing a carrier NAT / public Wi-Fi IP with a flagged number is
+            # not evidence of a ring - that would flag every neighbour.
+            factors.append(f"IP shared with flagged number(s) ignored: "
+                           f"{linked_ip} looks like a shared gateway")
+        elif shared_flagged:
             factors.append(f"IP shared with {len(shared_flagged)} flagged number(s)")
             score += min(len(shared_flagged) * 5, 15)
 
