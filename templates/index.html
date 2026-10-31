@@ -1359,8 +1359,10 @@ async function loadCmd(){
     // Map — init
     if(!cmdMapInit){
       cmdMap=L.map('cmdMap',{zoomControl:true,attributionControl:false}).setView([22.5,82],5);
-      L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
-        {maxZoom:18,attribution:'&copy; Stadia Maps'}).addTo(cmdMap);
+      // OpenStreetMap: free, no API key. Stadia's free tier rejects
+      // unregistered domains, which showed "Account Limit Exceeded" tiles.
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {maxZoom:18,attribution:'&copy; OpenStreetMap contributors'}).addTo(cmdMap);
       L.control.attribution({prefix:false,position:'bottomright'}).addTo(cmdMap);
       cmdMarkerLayer=L.layerGroup().addTo(cmdMap);
       cmdHeatLayer=null;
