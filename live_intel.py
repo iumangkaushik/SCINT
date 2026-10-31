@@ -14,6 +14,7 @@ LIVE, free, public sources:
 API keys are loaded from a local .env file and NEVER hard-coded.
 """
 
+import ipaddress
 import os
 import requests
 from dotenv import load_dotenv
@@ -26,6 +27,29 @@ HIBP_API_KEY = os.getenv("HIBP_API_KEY", "").strip()
 
 TIMEOUT = 10  # seconds
 UA = "SCINT-GPCSSI-2026"
+
+# A single AV engine flagging an IP is a well-known false-positive pattern
+# (one vendor's stale blocklist). Require agreement before adding risk.
+VT_MIN_ENGINES = 2
+
+
+def validate_public_ip(ip):
+    """
+    Return the normalised IP string, or raise ValueError.
+
+    Rejects anything that is not a syntactically valid, globally routable IP.
+    Private (10/8, 192.168/16), loopback, link-local and carrier-grade NAT
+    (100.64/10) addresses can't be attributed to one person, and sending them
+    to third-party APIs only leaks internal addressing. Validating here also
+    stops user input being spliced into API URL paths.
+    """
+    try:
+        addr = ipaddress.ip_address(str(ip).strip())
+    except ValueError:
+        raise ValueError(f"'{ip}' is not a valid IP address")
+    if not addr.is_global:
+        raise ValueError(f"{addr} is a private/reserved/CGNAT address - not attributable, not sent to live APIs")
+    return str(addr)
 
 
 # --- ip-api.com - geolocation (no key required) ---
@@ -100,10 +124,18 @@ def check_virustotal_ip(ip):
 
 # --- Combined live IP scoring ---
 def live_ip_score(ip):
+    try:
+        ip = validate_public_ip(ip)
+    except ValueError as e:
+        skipped = {"ok": False, "error": "skipped - not a public IP"}
+        return {"geo": skipped, "abuseipdb": skipped, "virustotal": skipped,
+                "notes": [str(e)]}, 0, []
+
     results = {
         "geo": geolocate_ip(ip),
         "abuseipdb": check_abuseipdb(ip),
         "virustotal": check_virustotal_ip(ip),
+        "notes": [],
     }
     score = 0
     factors = []
@@ -127,9 +159,13 @@ def live_ip_score(ip):
         if mal >= 5:
             score += 35
             factors.append(f"VirusTotal: {mal} engines flag malicious")
-        elif mal >= 1:
+        elif mal >= VT_MIN_ENGINES:
             score += 20
-            factors.append(f"VirusTotal: {mal} engine(s) flag malicious")
+            factors.append(f"VirusTotal: {mal} engines flag malicious")
+        elif mal == 1:
+            results["notes"].append(
+                "VirusTotal: 1 engine flags malicious - single-engine hit, "
+                "treated as a likely false positive and not scored")
 
     geo = results["geo"]
     if geo.get("ok"):
