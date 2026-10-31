@@ -260,11 +260,14 @@ def build_graph(phone):
         edges.append({"from": phone, "to": "case:" + c["case_number"]})
 
     ring = 0
+    shared_gateway = False
     if linked_ip:
         others = [r for r in scint.load_csv("telecom_db.csv")
                   if r["linked_ips"] == linked_ip and r["phone"] != phone]
+        # Don't draw everyone behind a carrier NAT IP as one "ring"
+        shared_gateway = scint.is_shared_gateway(linked_ip, len(others) + 1)
         others.sort(key=lambda r: r.get("flagged") != "True")
-        for r in others[:8]:
+        for r in ([] if shared_gateway else others[:8]):
             op = r["phone"]
             os_score, _ = scint.score_phone_quiet(op)
             add(op, op, "phone_high" if os_score >= 75 else "phone",
@@ -273,7 +276,7 @@ def build_graph(phone):
             ring += 1
 
     return {"query": phone, "risk_score": score, "ring_size": ring,
-            "nodes": nodes, "edges": edges}
+            "shared_gateway": shared_gateway, "nodes": nodes, "edges": edges}
 
 
 @app.route("/api/graph")
