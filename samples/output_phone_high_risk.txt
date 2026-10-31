@@ -1,0 +1,92 @@
+# Command: python scint.py --phone 9898329822
+
+
+
+╔══════════════════════════════════════════════════════════════╗
+║         ███████╗ ██████╗██╗███╗   ██╗████████╗             ║
+║         ██╔════╝██╔════╝██║████╗  ██║╚══██╔══╝             ║
+║         ███████╗██║     ██║██╔██╗ ██║   ██║                ║
+║         ╚════██║██║     ██║██║╚██╗██║   ██║                ║
+║         ███████║╚██████╗██║██║ ╚████║   ██║                ║
+║         ╚══════╝ ╚═════╝╚═╝╚═╝  ╚═══╝   ╚═╝                ║
+║                                                              ║
+║       Scam Cyber Intelligence Tool  v1.0                    ║
+║       GPCSSI 2026 | Gurugram Police                         ║
+║       ⚠  DUMMY DATA — FOR DEMONSTRATION ONLY ⚠             ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+[*] Analyzing phone number: 9898329822
+    Timestamp: 2026-10-31 19:18:56
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ AADHAAR INTELLIGENCE  [DUMMY DATA]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Name                        Sanjay Tiwari
+  Aadhaar ID                  4904-2932-2280
+  Date of Birth               1995-11-28
+  Address                     35 Gurugram
+  Flagged                     ⚠️  YES — Known fraud identity
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ BANKING & UPI INTELLIGENCE  [DUMMY DATA]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  UPI ID                      sanjay59@ybl
+  Bank                        ICICI Bank
+  Account Type                Savings
+  Suspicious Transactions     16
+  Suspicious Amount           ₹27,16,000
+  Linked Complaints           8
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ TELECOM / CDR / IPDR  [DUMMY DATA]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Carrier                     BSNL
+  SIM Type                    eSIM
+  Calls to Scam Numbers       63
+  International Calls         39
+  VOIP Usage                  ⚠️  YES — Suspicious
+  Linked IP Address           185.220.101.45
+  Last Known Location         Gurugram, Haryana
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ CCTNS — CRIME RECORDS  [DUMMY DATA]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ▸ Case: CYBER/NDA/2022/0552
+    Year                      2022
+    Crime Type                Loan App Extortion
+    Police Station            Cyber PS Noida
+    Status                    Convicted
+    Victims                   6
+
+  ▸ Case: CYBER/HR/2025/0417
+    Year                      2025
+    Crime Type                Phishing
+    Police Station            Cyber PS Delhi
+    Status                    Convicted
+    Victims                   33
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ RISK ASSESSMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Overall Risk Score   : 100/100 🔴 HIGH RISK
+
+  Risk Factors Detected:
+    → Flagged Aadhaar identity
+    → 16 suspicious transactions
+    → 8 banking complaints
+    → 63 calls to known scam numbers
+    → VOIP usage detected
+    → 2 prior criminal case(s)
+
+  RECOMMENDED ACTION:
+  → File Section 94 BNSS notice immediately
+  → Freeze linked bank accounts
+  → Coordinate with Cyber PS Gurugram
+
+──────────────────────────────────────────────────────────────
+  Report saved → .\reports\scint_9898329822_20261031_191856.json
+──────────────────────────────────────────────────────────────
+

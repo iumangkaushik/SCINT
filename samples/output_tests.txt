@@ -1,0 +1,17 @@
+# Command: python -m unittest -v
+
+test_malformed_input_is_rejected_before_url_building (tests.test_scoring.LiveIpScoringTests.test_malformed_input_is_rejected_before_url_building) ... ok
+test_multi_engine_virustotal_hit_is_scored (tests.test_scoring.LiveIpScoringTests.test_multi_engine_virustotal_hit_is_scored) ... ok
+test_private_and_cgnat_ips_never_reach_the_apis (tests.test_scoring.LiveIpScoringTests.test_private_and_cgnat_ips_never_reach_the_apis) ... ok
+test_single_engine_virustotal_hit_is_not_scored (tests.test_scoring.LiveIpScoringTests.test_single_engine_virustotal_hit_is_not_scored) ... ok
+test_clean_number_scores_low (tests.test_scoring.PhoneScoringTests.test_clean_number_scores_low) ... ok
+test_known_fraud_number_scores_high (tests.test_scoring.PhoneScoringTests.test_known_fraud_number_scores_high) ... ok
+test_unknown_number_scores_zero (tests.test_scoring.PhoneScoringTests.test_unknown_number_scores_zero) ... ok
+test_carrier_gateway_ip_is_not_evidence (tests.test_scoring.SharedIpFalsePositiveTests.test_carrier_gateway_ip_is_not_evidence) ... ok
+test_cgnat_range_is_never_evidence (tests.test_scoring.SharedIpFalsePositiveTests.test_cgnat_range_is_never_evidence) ... ok
+test_small_ring_on_one_ip_is_flagged (tests.test_scoring.SharedIpFalsePositiveTests.test_small_ring_on_one_ip_is_flagged) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.006s
+
+OK

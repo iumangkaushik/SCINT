@@ -1,0 +1,68 @@
+# Command: python scint.py --phone 9009897600
+
+
+
+╔══════════════════════════════════════════════════════════════╗
+║         ███████╗ ██████╗██╗███╗   ██╗████████╗             ║
+║         ██╔════╝██╔════╝██║████╗  ██║╚══██╔══╝             ║
+║         ███████╗██║     ██║██╔██╗ ██║   ██║                ║
+║         ╚════██║██║     ██║██║╚██╗██║   ██║                ║
+║         ███████║╚██████╗██║██║ ╚████║   ██║                ║
+║         ╚══════╝ ╚═════╝╚═╝╚═╝  ╚═══╝   ╚═╝                ║
+║                                                              ║
+║       Scam Cyber Intelligence Tool  v1.0                    ║
+║       GPCSSI 2026 | Gurugram Police                         ║
+║       ⚠  DUMMY DATA — FOR DEMONSTRATION ONLY ⚠             ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+[*] Analyzing phone number: 9009897600
+    Timestamp: 2026-10-31 19:18:57
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ AADHAAR INTELLIGENCE  [DUMMY DATA]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Name                        Pooja Malhotra
+  Aadhaar ID                  8081-0276-1433
+  Date of Birth               1975-01-28
+  Address                     81 Noida
+  Flagged                     ✅ No flags
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ BANKING & UPI INTELLIGENCE  [DUMMY DATA]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  UPI ID                      pooja67@ibl
+  Bank                        Yes Bank
+  Account Type                Savings
+  Suspicious Transactions     3
+  Suspicious Amount           ₹4,000
+  Linked Complaints           0
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ TELECOM / CDR / IPDR  [DUMMY DATA]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Carrier                     Jio
+  SIM Type                    Physical SIM
+  Calls to Scam Numbers       3
+  International Calls         24
+  VOIP Usage                  No
+  Linked IP Address           122.161.45.67
+  Last Known Location         Noida, UP
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ CCTNS — CRIME RECORDS  [DUMMY DATA]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✅ No prior criminal record found.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ RISK ASSESSMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Overall Risk Score   : 0/100 🟢 LOW RISK
+
+  → No immediate action required. Continue monitoring.
+
+──────────────────────────────────────────────────────────────
+  Report saved → .\reports\scint_9009897600_20261031_191857.json
+──────────────────────────────────────────────────────────────
+

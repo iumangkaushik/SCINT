@@ -1,0 +1,38 @@
+# Command: python scint.py --ip 192.168.1.10
+
+
+
+╔══════════════════════════════════════════════════════════════╗
+║         ███████╗ ██████╗██╗███╗   ██╗████████╗             ║
+║         ██╔════╝██╔════╝██║████╗  ██║╚══██╔══╝             ║
+║         ███████╗██║     ██║██╔██╗ ██║   ██║                ║
+║         ╚════██║██║     ██║██║╚██╗██║   ██║                ║
+║         ███████║╚██████╗██║██║ ╚████║   ██║                ║
+║         ╚══════╝ ╚═════╝╚═╝╚═╝  ╚═══╝   ╚═╝                ║
+║                                                              ║
+║       Scam Cyber Intelligence Tool  v1.0                    ║
+║       GPCSSI 2026 | Gurugram Police                         ║
+║       ⚠  DUMMY DATA — FOR DEMONSTRATION ONLY ⚠             ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+[*] Analyzing IP address: 192.168.1.10
+    Timestamp: 2026-10-31 19:18:57
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ IP THREAT INTELLIGENCE  [DUMMY DATA]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  IP not found in local threat database.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ LIVE THREAT INTELLIGENCE  [REAL DATA]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Geo lookup: skipped - not a public IP
+  AbuseIPDB: skipped - not a public IP
+  VirusTotal: skipped - not a public IP
+  [i] 192.168.1.10 is a private/reserved/CGNAT address - not attributable, not sent to live APIs
+
+  Live Risk Score      : 0/100 🟢 LOW RISK
+
+──────────────────────────────────────────────────────────────
+

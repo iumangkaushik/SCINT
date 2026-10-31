@@ -1,0 +1,142 @@
+# Command: python scint.py --bulk sample_phones.csv
+
+
+
+╔══════════════════════════════════════════════════════════════╗
+║         ███████╗ ██████╗██╗███╗   ██╗████████╗             ║
+║         ██╔════╝██╔════╝██║████╗  ██║╚══██╔══╝             ║
+║         ███████╗██║     ██║██╔██╗ ██║   ██║                ║
+║         ╚════██║██║     ██║██║╚██╗██║   ██║                ║
+║         ███████║╚██████╗██║██║ ╚████║   ██║                ║
+║         ╚══════╝ ╚═════╝╚═╝╚═╝  ╚═══╝   ╚═╝                ║
+║                                                              ║
+║       Scam Cyber Intelligence Tool  v1.0                    ║
+║       GPCSSI 2026 | Gurugram Police                         ║
+║       ⚠  DUMMY DATA — FOR DEMONSTRATION ONLY ⚠             ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+[*] Bulk scanning 100 phone(s) from sample_phones.csv
+    This may take a moment for IP/domain lookups (live API calls)...
+
+  [1/100] 9344002978                 0/100  LOW  
+  [2/100] 9147513627                 0/100  LOW  
+  [3/100] 9379298416                 0/100  LOW  
+  [4/100] 9177992298                70/100  MED  Flagged Aadhaar; 3 complaints
+  [5/100] 9222646861                 0/100  LOW  
+  [6/100] 9301756820                 0/100  LOW  
+  [7/100] 9105218549               100/100  HIGH  Flagged Aadhaar; 8 susp. txns
+  [8/100] 9465908538                 0/100  LOW  
+  [9/100] 9322808864                 0/100  LOW  
+  [10/100] 9370382653                 0/100  LOW  
+  [11/100] 9214584210               100/100  HIGH  18 susp. txns; 4 complaints
+  [12/100] 9025822018                20/100  LOW  14 scam calls
+  [13/100] 9188357951                 0/100  LOW  
+  [14/100] 9556963279                 0/100  LOW  
+  [15/100] 9085651788                90/100  HIGH  19 susp. txns; 5 complaints
+  [16/100] 9951838012                 0/100  LOW  
+  [17/100] 9555974754                 0/100  LOW  
+  [18/100] 9884791889               100/100  HIGH  Flagged Aadhaar; 16 susp. txns
+  [19/100] 9898329822               100/100  HIGH  Flagged Aadhaar; 16 susp. txns
+  [20/100] 9070015945                 0/100  LOW  
+  [21/100] 9789713311                 0/100  LOW  
+  [22/100] 9721283576                 0/100  LOW  
+  [23/100] 9879169797               100/100  HIGH  Flagged Aadhaar; 12 susp. txns
+  [24/100] 9608724385                 0/100  LOW  
+  [25/100] 9033042845                 0/100  LOW  
+  [26/100] 9143049074                 0/100  LOW  
+  [27/100] 9681792232                 0/100  LOW  
+  [28/100] 9812061769               100/100  HIGH  Flagged Aadhaar; 11 susp. txns
+  [29/100] 9079113571                 0/100  LOW  
+  [30/100] 9352136295                 0/100  LOW  
+  [31/100] 9692767094                 0/100  LOW  
+  [32/100] 9538965013                40/100  MED  6 susp. txns; 12 scam calls
+  [33/100] 9011527611                85/100  HIGH  Flagged Aadhaar; 7 susp. txns
+  [34/100] 9510626148                 0/100  LOW  
+  [35/100] 9699439828                 0/100  LOW  
+  [36/100] 9193039955               100/100  HIGH  Flagged Aadhaar; 20 susp. txns
+  [37/100] 9440330132                20/100  LOW  14 scam calls
+  [38/100] 9804658730                55/100  MED  Flagged Aadhaar; 7 susp. txns
+  [39/100] 9789235240                 0/100  LOW  
+  [40/100] 9137852223                 0/100  LOW  
+  [41/100] 9704247613                 0/100  LOW  
+  [42/100] 9800530514                35/100  LOW  7 susp. txns; 3 complaints
+  [43/100] 9106709072                 0/100  LOW  
+  [44/100] 9875262394                 0/100  LOW  
+  [45/100] 9134217233                 0/100  LOW  
+  [46/100] 9410823595                 0/100  LOW  
+  [47/100] 9619568080                 0/100  LOW  
+  [48/100] 9305703048                30/100  LOW  6 susp. txns; VOIP
+  [49/100] 9030042637                 0/100  LOW  
+  [50/100] 9579299239                 0/100  LOW  
+  [51/100] 9506635167                20/100  LOW  6 susp. txns
+  [52/100] 9909208242                 0/100  LOW  
+  [53/100] 9178013325                30/100  LOW  7 susp. txns; VOIP
+  [54/100] 9607002238                 0/100  LOW  
+  [55/100] 9637171124                35/100  LOW  7 susp. txns; 3 complaints
+  [56/100] 9022502152                 0/100  LOW  
+  [57/100] 9521222386                75/100  HIGH  Flagged Aadhaar; 6 susp. txns
+  [58/100] 9974476604                40/100  MED  7 susp. txns; 11 scam calls
+  [59/100] 9926877109                 0/100  LOW  
+  [60/100] 9568965164                 0/100  LOW  
+  [61/100] 9009897600                 0/100  LOW  
+  [62/100] 9244317746                 0/100  LOW  
+  [63/100] 9672521899                 0/100  LOW  
+  [64/100] 9502952920                 0/100  LOW  
+  [65/100] 9645011459                 0/100  LOW  
+  [66/100] 9331560408                 0/100  LOW  
+  [67/100] 9157539210               100/100  HIGH  Flagged Aadhaar; 18 susp. txns
+  [68/100] 9980655856                 0/100  LOW  
+  [69/100] 9069426698                 0/100  LOW  
+  [70/100] 9044186134                 0/100  LOW  
+  [71/100] 9172466412                 0/100  LOW  
+  [72/100] 9499961797                 0/100  LOW  
+  [73/100] 9162448717                 0/100  LOW  
+  [74/100] 9750580777               100/100  HIGH  Flagged Aadhaar; 10 susp. txns
+  [75/100] 9124528771                45/100  MED  7 susp. txns; VOIP
+  [76/100] 9744158662                 0/100  LOW  
+  [77/100] 9902710528                 0/100  LOW  
+  [78/100] 9572234888                 0/100  LOW  
+  [79/100] 9922755354                 0/100  LOW  
+  [80/100] 9138730375                 0/100  LOW  
+  [81/100] 9825753707                 0/100  LOW  
+  [82/100] 9680431041                10/100  LOW  VOIP
+  [83/100] 9188589383                 0/100  LOW  
+  [84/100] 9676447978                 0/100  LOW  
+  [85/100] 9268375474                 0/100  LOW  
+  [86/100] 9811833178                20/100  LOW  13 scam calls
+  [87/100] 9675127255                 0/100  LOW  
+  [88/100] 9676669716                45/100  MED  6 susp. txns; VOIP
+  [89/100] 9078269550                50/100  MED  Flagged Aadhaar; 3 complaints
+  [90/100] 9470876137                 0/100  LOW  
+  [91/100] 9078874549                55/100  MED  Flagged Aadhaar; 6 susp. txns
+  [92/100] 9839956816                75/100  HIGH  Flagged Aadhaar; 7 susp. txns
+  [93/100] 9878101081                20/100  LOW  6 susp. txns
+  [94/100] 9331618814                 0/100  LOW  
+  [95/100] 9593282507                 0/100  LOW  
+  [96/100] 9032588327                45/100  MED  6 susp. txns; 3 complaints
+  [97/100] 9210835799                40/100  MED  Flagged Aadhaar; 3 complaints
+  [98/100] 9672161121                 0/100  LOW  
+  [99/100] 9949119070                 0/100  LOW  
+  [100/100] 9919652003                 0/100  LOW  
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ BULK SCAN SUMMARY — sorted by risk
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  HIGH: 13   MEDIUM: 10   LOW: 77   Total: 100
+
+    100/100  9105218549               Flagged Aadhaar; 8 susp. txns; 3 complaints; 35 sc
+    100/100  9214584210               18 susp. txns; 4 complaints; 50 scam calls; VOIP; 
+    100/100  9884791889               Flagged Aadhaar; 16 susp. txns; 9 complaints; 30 s
+    100/100  9898329822               Flagged Aadhaar; 16 susp. txns; 8 complaints; 63 s
+    100/100  9879169797               Flagged Aadhaar; 12 susp. txns; 3 complaints; 34 s
+    100/100  9812061769               Flagged Aadhaar; 11 susp. txns; 5 complaints; 62 s
+    100/100  9193039955               Flagged Aadhaar; 20 susp. txns; 8 complaints; 63 s
+    100/100  9157539210               Flagged Aadhaar; 18 susp. txns; 7 complaints; 65 s
+    100/100  9750580777               Flagged Aadhaar; 10 susp. txns; 7 complaints; 20 s
+     90/100  9085651788               19 susp. txns; 5 complaints; 36 scam calls; VOIP; 
+    ... and 90 more in the saved CSV
+
+  📊 Results saved → .\reports\bulk_results_20261031_191858.csv
+  Open in Excel to sort/filter all 100 results.
+
